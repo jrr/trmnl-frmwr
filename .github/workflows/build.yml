@@ -26,6 +26,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.os == 'macos-15'
+        with:
+          xcode-version: latest-stable
+
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
