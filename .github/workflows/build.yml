@@ -4,7 +4,13 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +28,11 @@ jobs:
 
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
+
+      - name: Display PlatformIO Information
+        run: |
+          pio system info
+          g++ --version
 
       - name: build
         run: pio run
