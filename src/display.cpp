@@ -74,7 +74,7 @@ void display_show_image(uint8_t *image_buffer, bool reverse, bool isPNG)
     Log.error("%s [%d]: free alloc heap - %d\r\n", __FILE__, __LINE__, ESP.getMaxAllocHeap());
     if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
     {
-        Log.fatal("%s [%d]: Failed to apply for black memory...\r\n", __FILE__, __LINE__);
+        Log.fatal("%s [%d]: Failed to malloc %d bytes for black memory...\r\n", __FILE__, __LINE__, Imagesize);
         ESP.restart();
     }
     Log.info("%s [%d]: Paint_NewImage %d\r\n", __FILE__, __LINE__, reverse);
@@ -126,7 +126,7 @@ void display_show_msg(uint8_t *image_buffer, MSG message_type)
     Log.error("%s [%d]: free alloc heap - %d\r\n", __FILE__, __LINE__, ESP.getMaxAllocHeap());
     if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
     {
-        Log.fatal("%s [%d]: Failed to apply for black memory...\r\n", __FILE__, __LINE__);
+        Log.fatal("%s [%d]: Failed to malloc %d bytes for black memory...\r\n", __FILE__, __LINE__, Imagesize);
         ESP.restart();
     }
 
@@ -279,7 +279,7 @@ void display_show_msg(uint8_t *image_buffer, MSG message_type, String friendly_i
     Log.error("%s [%d]: free alloc heap - %d\r\n", __FILE__, __LINE__, ESP.getMaxAllocHeap());
     if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
     {
-        Log.fatal("%s [%d]: Failed to apply for black memory...\r\n", __FILE__, __LINE__);
+        Log.fatal("%s [%d]: Failed to malloc %d bytes for black memory...\r\n", __FILE__, __LINE__, Imagesize);
         ESP.restart();
     }
 

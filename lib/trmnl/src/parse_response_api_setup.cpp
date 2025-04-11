@@ -9,7 +9,7 @@ ApiSetupResponse parseResponse_apiSetup(String &payload)
 
   if (error)
   {
-    Log_error("JSON deserialization error.");
+    Log_error("JSON deserialization error: %s", error.c_str());
     return {.outcome = ApiSetupOutcome::DeserializationError};
   }
 

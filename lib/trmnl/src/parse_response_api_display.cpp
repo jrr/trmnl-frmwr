@@ -11,7 +11,7 @@ ApiDisplayResponse parseResponse_apiDisplay(String &payload)
 
   if (error)
   {
-    Log_error("JSON deserialization error.");
+    Log_error("JSON deserialization error: %s", error.c_str());
     return {.outcome = ApiDisplayOutcome::DeserializationError};
   }
   String special_function_str = doc["special_function"];
