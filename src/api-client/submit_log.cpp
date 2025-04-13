@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "trmnl_log.h"
 #include <memory>
-#include "http_client.h"
+#include <WiFi.h>
 
 bool submitLogToApi(LogApiInput &input, const char *api_url)
 {
