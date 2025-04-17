@@ -8,15 +8,16 @@
 // Error codes for the HTTP utilities - using distinct values to avoid overlap
 enum HttpError
 {
-  CLIENT_ERROR = 100,    // Failed to create client
-  CONNECTION_ERROR = 101 // Failed to connect
+  HTTPCLIENT_SUCCESS = 100,
+  HTTPCLIENT_WIFICLIENT_ERROR = 100, // Failed to create client
+  HTTPCLIENT_HTTPCLIENT_ERROR = 101  // Failed to connect
 };
 
 /**
- * @brief Higher-order function that sets up WiFiClient and initial HTTPClient, then runs a callback with both
+ * @brief Higher-order function that sets up WiFiClient and HTTPClient, then runs a callback
  * @param url The initial URL to connect to
- * @param callback Function to call with the WiFiClient and HTTPClient (must return int)
- * @return The int value returned by the callback function or CLIENT_ERROR/CONNECTION_ERROR on failure
+ * @param callback Function to call with the HTTPClient
+ * @return HTTPCLIENT_SUCCESS / HTTPCLIENT_WIFICLIENT_ERROR / HTTPCLIENT_HTTPCLIENT_ERROR
  */
 template <typename Callback>
 int withHttp(const String &url, Callback callback)
@@ -40,24 +41,27 @@ int withHttp(const String &url, Callback callback)
   // Check if client creation succeeded
   if (!client)
   {
-    return CLIENT_ERROR;
+    return HTTPCLIENT_WIFICLIENT_ERROR;
   }
 
   int result;
   { // scoping block for http client
 
     HTTPClient https;
-    if (!https.begin(*client, url))
+    if (https.begin(*client, url))
     {
-      delete client;
-      return CONNECTION_ERROR;
+
+      callback(https);
+
+      result = HTTPCLIENT_SUCCESS;
+
+      // Clean up
+      https.end();
     }
-
-    // Call the callback with both the WiFiClient and HTTPClient
-    result = callback(*client, https);
-
-    // Clean up
-    https.end();
+    else
+    {
+      result = HTTPCLIENT_HTTPCLIENT_ERROR;
+    }
   }
   delete client;
 
