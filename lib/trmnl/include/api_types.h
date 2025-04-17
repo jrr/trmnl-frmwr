@@ -40,6 +40,7 @@ struct ApiDisplayResponse
   bool reset_firmware;
   SPECIAL_FUNCTION special_function;
   String action;
+  String parseErrorDetail;
 };
 
 struct ApiDisplayInputs
