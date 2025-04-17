@@ -7,4 +7,11 @@ struct LogApiInput
   const char *log_buffer;
 };
 
-bool submitLogToApi(LogApiInput &input, const char *api_url);
+struct SubmitLogResult
+{
+  bool success;
+  String error_message;
+  int httpCode;
+};
+
+SubmitLogResult submitLogToApi(LogApiInput &input, const char *api_url);

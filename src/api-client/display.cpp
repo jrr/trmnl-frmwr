@@ -71,8 +71,8 @@ ApiDisplayResult fetchApiDisplay(ApiDisplayInputs &apiDisplayInputs)
                                       // httpCode will be negative on error
                                       if (httpCode < 0)
                                       {
-                                        Log.error("%s [%d]: [HTTPS] GET... failed, error: %s\r\n", __FILE__, __LINE__, https.errorToString(httpCode).c_str());
-                                        String errorMsg = "HTTP Client failed with error: " + https.errorToString(httpCode);
+                                        Log.error("%s [%d]: [HTTPS] GET... failed, error: %s\r\n", __FILE__, __LINE__, String(httpCode).c_str());
+                                        String errorMsg = "HTTP Client failed with error: " + String(httpCode);
                                         http_result = ApiDisplayResult{.error = HTTPS_RESPONSE_CODE_INVALID, .response = {}, .error_detail = errorMsg};
                                         return;
                                       }
@@ -83,7 +83,7 @@ ApiDisplayResult fetchApiDisplay(ApiDisplayInputs &apiDisplayInputs)
                                       if (!(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY))
                                       {
                                         Log.info("%s [%d]: [HTTPS] Unable to connect\r\n", __FILE__, __LINE__);
-                                        http_result = ApiDisplayResult{.error = HTTPS_REQUEST_FAILED, .response = {}, .error_detail = "returned code is not OK: " + String(httpCode)};
+                                        http_result = ApiDisplayResult{.error = HTTPS_REQUEST_FAILED, .response = {}, .error_detail = "returned code is not OK: " + https.errorToString(httpCode)};
                                         return;
                                       }
 

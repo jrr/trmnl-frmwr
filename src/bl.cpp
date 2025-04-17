@@ -1809,7 +1809,7 @@ static void log_POST(char *log_buffer, size_t size)
 
   LogApiInput input{api_key, log_buffer};
   auto result = submitLogToApi(input, preferences.getString(PREFERENCES_API_URL, API_BASE_URL).c_str());
-  if (!result)
+  if (!result.success)
   {
     Log_info("Was unable to send log to API; saving locally for later.");
     // log not send
@@ -1853,7 +1853,7 @@ static void checkLogNotes(void)
     Log.info("%s [%d]: need to send the log\r\n", __FILE__, __LINE__);
 
     LogApiInput input{api_key, log.c_str()};
-    result = submitLogToApi(input, preferences.getString(PREFERENCES_API_URL, API_BASE_URL).c_str());
+    result = submitLogToApi(input, preferences.getString(PREFERENCES_API_URL, API_BASE_URL).c_str()).success;
   }
   else
   {
