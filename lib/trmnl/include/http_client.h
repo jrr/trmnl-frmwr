@@ -13,6 +13,8 @@ enum HttpError
   HTTPCLIENT_HTTPCLIENT_ERROR = 101  // Failed to connect
 };
 
+// idea: pass errors into the callback instead of returning them.
+// (then the callback's return value can pass through)
 /**
  * @brief Higher-order function that sets up WiFiClient and HTTPClient, then runs a callback
  * @param url The initial URL to connect to
