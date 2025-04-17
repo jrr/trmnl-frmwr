@@ -27,6 +27,7 @@
 #include <api_response_parsing.h>
 #include "logging_parcers.h"
 #include <SPIFFS.h>
+#include <api-client/display.h>
 
 bool pref_clear = false;
 String new_filename = "";
@@ -535,40 +536,6 @@ ApiDisplayInputs loadApiDisplayInputs(Preferences &preferences)
   return inputs;
 }
 
-void addHeaders(HTTPClient &https, ApiDisplayInputs &inputs)
-{
-  Log.info("%s [%d]: Added headers:\n\r"
-           "ID: %s\n\r"
-           "Special function: %d\n\r"
-           "Access-Token: %s\n\r"
-           "Refresh_Rate: %s\n\r"
-           "Battery-Voltage: %s\n\r"
-           "FW-Version: %s\r\n"
-           "RSSI: %s\r\n",
-           __FILE__, __LINE__,
-           inputs.macAddress.c_str(),
-           inputs.specialFunction,
-           inputs.apiKey.c_str(),
-           String(inputs.refreshRate).c_str(),
-           String(inputs.batteryVoltage).c_str(),
-           inputs.firmwareVersion.c_str(),
-           String(inputs.rssi));
-
-  https.addHeader("ID", WiFi.macAddress());
-  https.addHeader("Access-Token", inputs.apiKey);
-  https.addHeader("Refresh-Rate", String(inputs.refreshRate));
-  https.addHeader("Battery-Voltage", String(inputs.batteryVoltage));
-  https.addHeader("FW-Version", inputs.firmwareVersion);
-  https.addHeader("RSSI", String(inputs.rssi));
-  https.addHeader("Width", String(inputs.displayWidth));
-  https.addHeader("Height", String(inputs.displayHeight));
-
-  if (special_function != SF_NONE)
-  {
-    Log.info("%s [%d]: Add special function: true (%d)\r\n", __FILE__, __LINE__, special_function);
-    https.addHeader("special_function", "true");
-  }
-}
 
 /**
  * @brief Function to ping server and download and show the image if all is OK
