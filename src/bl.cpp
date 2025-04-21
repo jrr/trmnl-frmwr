@@ -558,33 +558,23 @@ static https_request_err_e downloadAndShow()
   handleApiDisplayResponse(apiDisplayResult.response);
 
   https_request_err_e result = HTTPS_NO_ERR;
-  WiFiClientSecure *secureClient = new WiFiClientSecure;
-  secureClient->setInsecure();
-  WiFiClient *insecureClient = new WiFiClient;
 
-  bool isHttps = true;
-  if (apiDisplayInputs.baseUrl.indexOf("https://") == -1)
+  // Only download the image if needed based on status and firmware flags
+  if (status && !update_firmware && !reset_firmware)
   {
-    isHttps = false;
-  }
-
-  // define client depending on the isHttps variable
-  WiFiClient *client = isHttps ? secureClient : insecureClient;
-
-  if (!client)
-  {
-    Log.error("%s [%d]: Unable to create client\r\n", __FILE__, __LINE__);
-
-    return HTTPS_UNABLE_TO_CONNECT;
-  }
-
-  { // Add a scoping block for HTTPClient https to make sure it is destroyed before WiFiClientSecure *client is
-
-    HTTPClient https;
-    if (status && !update_firmware && !reset_firmware)
+    status = false;
+    
+    result = withHttp(filename, [&](HTTPClient *httpsPtr, HttpError errorCode) -> https_request_err_e
     {
-      status = false;
-
+      if (errorCode != HttpError::HTTPCLIENT_SUCCESS || !httpsPtr)
+      {
+        Log.error("%s [%d]: unable to connect\r\n", __FILE__, __LINE__);
+        submit_log("unable to connect to the API");
+        return HTTPS_UNABLE_TO_CONNECT;
+      }
+      
+      HTTPClient &https = *httpsPtr;
+      
       // The timeout will be zero if no value was returned, and in that case we just use the default timeout.
       // Otherwise, we set the requested timeout.
       uint32_t requestedTimeout = apiDisplayResult.response.image_url_timeout;
@@ -604,15 +594,8 @@ static https_request_err_e downloadAndShow()
       }
 
       Log.info("%s [%d]: [HTTPS] Request to %s\r\n", __FILE__, __LINE__, filename);
-      client = strstr(filename, "https://") == nullptr ? insecureClient : secureClient;
-      if (!https.begin(*client, filename)) // HTTPS
-      {
-        Log.error("%s [%d]: unable to connect\r\n", __FILE__, __LINE__);
-
-        submit_log("unable to connect to the API");
-
-        return HTTPS_UNABLE_TO_CONNECT;
-      }const char* headers[] = { "Content-Type" };
+      
+      const char* headers[] = { "Content-Type" };
       https.collectHeaders(headers, 1);
       Log.info("%s [%d]: [HTTPS] GET..\r\n", __FILE__, __LINE__);
       Log.info("%s [%d]: RSSI: %d\r\n", __FILE__, __LINE__, WiFi.RSSI());
@@ -841,8 +824,9 @@ static https_request_err_e downloadAndShow()
 
         return HTTPS_WRONG_IMAGE_FORMAT;
       }
-    }
     
+      return result;
+    });
   }
 
   if (send_log)
