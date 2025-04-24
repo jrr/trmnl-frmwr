@@ -3,6 +3,7 @@
 #include "trmnl_log.h"
 #include <memory>
 #include <WiFi.h>
+#include <http_client.h>
 
 bool submitLogToApi(LogApiInput &input, const char *api_url)
 {
