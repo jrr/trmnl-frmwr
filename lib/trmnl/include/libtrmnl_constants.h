@@ -1,0 +1,5 @@
+
+#define PREFERENCES_LOG_KEY "log_"
+#define PREFERENCES_LOG_BUFFER_HEAD_KEY "log_head"
+
+#define LOG_MAX_NOTES_NUMBER 5

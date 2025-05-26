@@ -5,16 +5,12 @@
 #define FW_MINOR_VERSION 5
 #define FW_PATCH_VERSION 5
 
-#define LOG_MAX_NOTES_NUMBER 5
-
 #define PREFERENCES_API_KEY "api_key"
 #define PREFERENCES_API_KEY_DEFAULT ""
 #define PREFERENCES_API_URL "api_url"
 #define PREFERENCES_FRIENDLY_ID "friendly_id"
 #define PREFERENCES_FRIENDLY_ID_DEFAULT ""
 #define PREFERENCES_SLEEP_TIME_KEY "refresh_rate"
-#define PREFERENCES_LOG_KEY "log_"
-#define PREFERENCES_LOG_BUFFER_HEAD_KEY "log_head"
 #define PREFERENCES_LOG_ID_KEY "log_id"
 #define PREFERENCES_DEVICE_REGISTERED_KEY "plugin"
 #define PREFERENCES_SF_KEY "sf"
@@ -22,6 +18,9 @@
 #define PREFERENCES_LAST_SLEEP_TIME "last_sleep"
 #define PREFERENCES_CONNECT_API_RETRY_COUNT "retry_count"
 #define PREFERENCES_CONNECT_WIFI_RETRY_COUNT "wifi_retry"
+
+// a few config constants exist in the library:
+#include "libtrmnl_constants.h"
 
 #define WIFI_CONNECTION_RSSI (-100)
 
