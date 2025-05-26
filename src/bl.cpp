@@ -31,6 +31,7 @@
 #include <api-client/display.h>
 #include "driver/gpio.h"
 #include <nvs.h>
+#include <preferences_persistence.h>
 
 bool pref_clear = false;
 String new_filename = "";
@@ -1850,7 +1851,8 @@ static void log_POST(char *log_buffer, size_t size)
   {
     Log_info("Was unable to send log to API; saving locally for later.");
     // log not send
-    store_log(log_buffer, size, preferences);
+    PreferencesPersistence preferencesPersistence(preferences);
+    store_log(log_buffer, size, preferencesPersistence);
   }
 }
 
@@ -1870,7 +1872,9 @@ static uint32_t getTime(void)
 static void checkLogNotes(void)
 {
   String log;
-  gather_stored_logs(log, preferences);
+
+  PreferencesPersistence preferencesPersistence(preferences);
+  gather_stored_logs(log, preferencesPersistence);
 
   String api_key = "";
   if (preferences.isKey(PREFERENCES_API_KEY))
@@ -1898,7 +1902,8 @@ static void checkLogNotes(void)
   }
   if (result == true)
   {
-    clear_stored_logs(preferences);
+    PreferencesPersistence preferencesPersistence(preferences);
+    clear_stored_logs(preferencesPersistence);
   }
 }
 
