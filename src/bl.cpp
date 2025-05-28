@@ -407,14 +407,7 @@ void bl_init(void)
   {
   case HTTPS_REQUEST_FAILED:
   {
-    if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-    {
-      showMessageWithLogo(API_ERROR);
-    }
-    else
-    {
-      showMessageWithLogo(WIFI_WEAK);
-    }
+    showWifiErrorOr(API_ERROR);
   }
   break;
   case HTTPS_RESPONSE_CODE_INVALID:
@@ -424,14 +417,7 @@ void bl_init(void)
   break;
   case HTTPS_UNABLE_TO_CONNECT:
   {
-    if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-    {
-      showMessageWithLogo(API_ERROR);
-    }
-    else
-    {
-      showMessageWithLogo(WIFI_WEAK);
-    }
+    showWifiErrorOr(API_ERROR);
   }
   break;
   case HTTPS_WRONG_IMAGE_FORMAT:
@@ -441,14 +427,7 @@ void bl_init(void)
   break;
   case HTTPS_WRONG_IMAGE_SIZE:
   {
-    if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-    {
-      showMessageWithLogo(API_SIZE_ERROR);
-    }
-    else
-    {
-      showMessageWithLogo(WIFI_WEAK);
-    }
+    showWifiErrorOr(API_SIZE_ERROR);
   }
   break;
   case HTTPS_CLIENT_FAILED:
@@ -481,6 +460,18 @@ void bl_init(void)
     goToSleep();
   else
     ESP.restart();
+}
+
+void showWifiErrorOr(MSG msg)
+{
+  if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
+  {
+    showMessageWithLogo(msg);
+  }
+  else
+  {
+    showMessageWithLogo(WIFI_WEAK);
+  }
 }
 
 /**
@@ -1506,29 +1497,14 @@ static void getDeviceCredentials()
           else
           {
             Log.info("%s [%d]: [HTTPS] Unable to connect\r\n", __FILE__, __LINE__);
-
-            if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-            {
-              showMessageWithLogo(API_ERROR);
-            }
-            else
-            {
-              showMessageWithLogo(WIFI_WEAK);
-            }
+            showWifiErrorOr(API_ERROR);
             submit_log("returned code is not OK. Code - %d", httpCode);
           }
         }
         else
         {
           Log.error("%s [%d]: [HTTPS] GET... failed, error: %s\r\n", __FILE__, __LINE__, https.errorToString(httpCode).c_str());
-          if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-          {
-            showMessageWithLogo(API_ERROR);
-          }
-          else
-          {
-            showMessageWithLogo(WIFI_WEAK);
-          }
+          showWifiErrorOr(API_ERROR);
           submit_log("HTTP Client failed with error: %s", https.errorToString(httpCode).c_str());
         }
 
@@ -1591,14 +1567,7 @@ static void getDeviceCredentials()
                 free(buffer);
                 buffer = nullptr;
                 Log.error("%s [%d]: Receiving failed. Read: %d\r\n", __FILE__, __LINE__, counter);
-                if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-                {
-                  showMessageWithLogo(API_SIZE_ERROR);
-                }
-                else
-                {
-                  showMessageWithLogo(WIFI_WEAK);
-                }
+                showWifiErrorOr(API_SIZE_ERROR);
                 submit_log("Receiving failed. Read: %d", counter);
               }
             }
@@ -1606,42 +1575,21 @@ static void getDeviceCredentials()
             {
               Log.error("%s [%d]: [HTTPS] GET... failed, error: %s\r\n", __FILE__, __LINE__, https.errorToString(httpCode).c_str());
               https.end();
-              if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-              {
-                showMessageWithLogo(API_ERROR);
-              }
-              else
-              {
-                showMessageWithLogo(WIFI_WEAK);
-              }
+              showWifiErrorOr(API_ERROR);
               submit_log("HTTPS received code is not OK. Code: %d", httpCode);
             }
           }
           else
           {
             Log.error("%s [%d]: [HTTPS] GET... failed, error: %s\r\n", __FILE__, __LINE__, https.errorToString(httpCode).c_str());
-            if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-            {
-              showMessageWithLogo(API_ERROR);
-            }
-            else
-            {
-              showMessageWithLogo(WIFI_WEAK);
-            }
+            showWifiErrorOr(API_ERROR);
             submit_log("HTTP Client failed with error: %s", https.errorToString(httpCode).c_str());
           }
         }
         else
         {
           Log.error("%s [%d]: unable to connect\r\n", __FILE__, __LINE__);
-          if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-          {
-            showMessageWithLogo(API_ERROR);
-          }
-          else
-          {
-            showMessageWithLogo(WIFI_WEAK);
-          }
+          showWifiErrorOr(API_ERROR);
           submit_log("unable to connect to the API");
         }
       }
@@ -1691,14 +1639,7 @@ static void checkAndPerformFirmwareUpdate(void)
              if (errorCode != HttpError::HTTPCLIENT_SUCCESS || !https)
              {
                Log.fatal("%s [%d]: Unable to connect for firmware update\r\n", __FILE__, __LINE__);
-               if (WiFi.RSSI() > WIFI_CONNECTION_RSSI)
-               {
-                 showMessageWithLogo(API_ERROR);
-               }
-               else
-               {
-                 showMessageWithLogo(WIFI_WEAK);
-               }
+               showWifiErrorOr(API_ERROR);
              }
 
              int httpCode = https->GET();

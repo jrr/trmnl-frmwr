@@ -8,6 +8,8 @@
  */
 void bl_init(void);
 
+void showWifiErrorOr();
+
 /**
  * @brief Function to process business logic module
  * @param none
