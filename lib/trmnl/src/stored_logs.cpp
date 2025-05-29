@@ -1,14 +1,17 @@
+#include <stored_logs.h>
 #include <trmnl_log.h>
 #include <persistence_interface.h>
-#include <libtrmnl_constants.h>
 
-void store_log(const char *log_buffer, size_t size, Persistence &persistence)
+StoredLogs::StoredLogs(uint8_t max_notes, const char *log_key, const char *head_key, Persistence& persistence)
+    : max_notes(max_notes), log_key(log_key), head_key(head_key), persistence(persistence) {}
+
+void StoredLogs::store_log(const String& log_buffer)
 {
   bool result = false;
 
-  for (uint8_t i = 0; i < LOG_MAX_NOTES_NUMBER; i++)
+  for (uint8_t i = 0; i < max_notes; i++)
   {
-    String key = PREFERENCES_LOG_KEY + String(i);
+    String key = log_key + String(i);
     if (persistence.recordExists(key.c_str()))
     {
       Log_info("key %s exists", key.c_str());
@@ -17,9 +20,9 @@ void store_log(const char *log_buffer, size_t size, Persistence &persistence)
     else
     {
       Log_info("key %s not exists", key.c_str());
-      size_t res = persistence.writeString(key.c_str(), log_buffer);
-      Log_info("Initial size %d. Received size - %d", size, res);
-      if (res == size)
+      size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
+      Log_info("Initial size %d. Received size - %d", log_buffer.length(), res);
+      if (res == log_buffer.length())
       {
         Log_info("log note written success");
       }
@@ -34,19 +37,19 @@ void store_log(const char *log_buffer, size_t size, Persistence &persistence)
   if (!result)
   {
     uint8_t head = 0;
-    if (persistence.recordExists(PREFERENCES_LOG_BUFFER_HEAD_KEY))
+    if (persistence.recordExists(head_key))
     {
       Log_info("head exists");
-      head = persistence.readUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, 0);
+      head = persistence.readUChar(head_key, 0);
     }
     else
     {
       Log_info("head NOT exists");
     }
 
-    String key = PREFERENCES_LOG_KEY + String(head);
-    size_t res = persistence.writeString(key.c_str(), log_buffer);
-    if (res == size)
+    String key = log_key + String(head);
+    size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
+    if (res == log_buffer.length())
     {
       Log_info("log note written success");
     }
@@ -56,12 +59,12 @@ void store_log(const char *log_buffer, size_t size, Persistence &persistence)
     }
 
     head += 1;
-    if (head == LOG_MAX_NOTES_NUMBER)
+    if (head == max_notes)
     {
       head = 0;
     }
 
-    uint8_t result_write = persistence.writeUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, head);
+    uint8_t result_write = persistence.writeUChar(head_key, head);
     if (result_write)
       Log_info("head written success");
     else
@@ -69,11 +72,11 @@ void store_log(const char *log_buffer, size_t size, Persistence &persistence)
   }
 }
 
-void gather_stored_logs(String &log, Persistence &persistence)
+void StoredLogs::gather_stored_logs(String &log)
 {
-  for (uint8_t i = 0; i < LOG_MAX_NOTES_NUMBER; i++)
+  for (uint8_t i = 0; i < max_notes; i++)
   {
-    String key = PREFERENCES_LOG_KEY + String(i);
+    String key = log_key + String(i);
     if (persistence.recordExists(key.c_str()))
     {
       Log_info("log note exists");
@@ -82,7 +85,7 @@ void gather_stored_logs(String &log, Persistence &persistence)
       {
         log += note;
 
-        String next_key = PREFERENCES_LOG_KEY + String(i + 1);
+        String next_key = log_key + String(i + 1);
         if (persistence.recordExists(next_key.c_str()))
         {
           log += ",";
@@ -92,12 +95,11 @@ void gather_stored_logs(String &log, Persistence &persistence)
   }
 }
 
-void clear_stored_logs(Persistence &persistence)
+void StoredLogs::clear_stored_logs()
 {
-
-  for (uint8_t i = 0; i < LOG_MAX_NOTES_NUMBER; i++)
+  for (uint8_t i = 0; i < max_notes; i++)
   {
-    String key = PREFERENCES_LOG_KEY + String(i);
+    String key = log_key + String(i);
     if (persistence.recordExists(key.c_str()))
     {
       Log_info("log note exists");

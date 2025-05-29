@@ -5,30 +5,31 @@
 #include "memory_persistence.h"
 
 MemoryPersistence persistence;
+StoredLogs subject(3, "log_", "log_head", persistence);
 
 void test_stores_string(void)
 {
   TEST_ASSERT_EQUAL(0, persistence.size());
-  store_log("asdf", 4, persistence);
+  subject.store_log("asdf");
   TEST_ASSERT_EQUAL(1, persistence.size());
   String s;
-  gather_stored_logs(s, persistence);
+  subject.gather_stored_logs(s);
   TEST_ASSERT_EQUAL_STRING("asdf", s.c_str());
-  clear_stored_logs(persistence);
+  subject.clear_stored_logs();
   TEST_ASSERT_EQUAL(0, persistence.size());
 }
 
 void test_stores_several_strings()
 {
   TEST_ASSERT_EQUAL(0, persistence.size());
-  store_log("asdf", 4, persistence);
-  store_log("qwer", 4, persistence);
-  store_log("zxcv", 4, persistence);
+  subject.store_log("asdf");
+  subject.store_log("qwer");
+  subject.store_log("zxcv");
   TEST_ASSERT_EQUAL(3, persistence.size());
   String s;
-  gather_stored_logs(s, persistence);
+  subject.gather_stored_logs(s);
   TEST_ASSERT_EQUAL_STRING("asdf,qwer,zxcv", s.c_str());
-  clear_stored_logs(persistence);
+  subject.clear_stored_logs();
   TEST_ASSERT_EQUAL(0, persistence.size());
 }
 
@@ -36,26 +37,24 @@ void test_circular_buffer_overwrites_oldest()
 {
   TEST_ASSERT_EQUAL(0, persistence.size());
 
-  store_log("log1", 4, persistence);
-  store_log("log2", 4, persistence);
-  store_log("log3", 4, persistence);
-  store_log("log4", 4, persistence);
-  store_log("log5", 4, persistence);
+  subject.store_log("log1");
+  subject.store_log("log2");
+  subject.store_log("log3");
 
-  TEST_ASSERT_EQUAL(5, persistence.size());
+  TEST_ASSERT_EQUAL(3, persistence.size());
 
-  store_log("log6", 4, persistence);
+  subject.store_log("log4");
 
-  // Should now be 6 total (5 logs + head pointer)
-  TEST_ASSERT_EQUAL(6, persistence.size());
+  // Should now be 4 total (3 logs + head pointer)
+  TEST_ASSERT_EQUAL(4, persistence.size());
   
   String s;
-  gather_stored_logs(s, persistence);
+  subject.gather_stored_logs(s);
 
-  TEST_ASSERT(strstr(s.c_str(), "log6,") != NULL);
+  TEST_ASSERT(strstr(s.c_str(), "log4,") != NULL);
   TEST_ASSERT(strstr(s.c_str(), "log1,") == NULL); // log1 should be gone
-  
-  clear_stored_logs(persistence);
+
+  subject.clear_stored_logs();
 
   TEST_ASSERT_EQUAL(1, persistence.size());
 }

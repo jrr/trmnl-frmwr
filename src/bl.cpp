@@ -58,6 +58,8 @@ SPECIAL_FUNCTION special_function = SF_NONE;
 RTC_DATA_ATTR uint8_t need_to_refresh_display = 1;
 
 Preferences preferences;
+PreferencesPersistence preferencesPersistence(preferences);
+StoredLogs storedLogs(LOG_MAX_NOTES_NUMBER, PREFERENCES_LOG_KEY, PREFERENCES_LOG_BUFFER_HEAD_KEY, preferencesPersistence);
 
 static https_request_err_e downloadAndShow(); // download and show the image
 static https_request_err_e handleApiDisplayResponse(ApiDisplayResponse &apiResponse);
@@ -1851,8 +1853,7 @@ static void log_POST(char *log_buffer, size_t size)
   {
     Log_info("Was unable to send log to API; saving locally for later.");
     // log not send
-    PreferencesPersistence preferencesPersistence(preferences);
-    store_log(log_buffer, size, preferencesPersistence);
+    storedLogs.store_log(String(log_buffer));
   }
 }
 
@@ -1873,8 +1874,7 @@ static void checkLogNotes(void)
 {
   String log;
 
-  PreferencesPersistence preferencesPersistence(preferences);
-  gather_stored_logs(log, preferencesPersistence);
+  storedLogs.gather_stored_logs(log);
 
   String api_key = "";
   if (preferences.isKey(PREFERENCES_API_KEY))
@@ -1902,8 +1902,7 @@ static void checkLogNotes(void)
   }
   if (result == true)
   {
-    PreferencesPersistence preferencesPersistence(preferences);
-    clear_stored_logs(preferencesPersistence);
+    storedLogs.clear_stored_logs();
   }
 }
 
