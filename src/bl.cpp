@@ -25,6 +25,7 @@
 #include "api-client/submit_log.h"
 #include <special_function.h>
 #include <api_response_parsing.h>
+#include <api_request_serialization.h>
 #include "logging_parcers.h"
 #include <SPIFFS.h>
 #include "http_client.h"
@@ -2106,40 +2107,25 @@ DeviceStatusStamp getDeviceStatusStamp()
   return deviceStatus;
 }
 
+
 bool SerializeJsonLog(DeviceStatusStamp device_status_stamp, time_t timestamp, int codeline, const char *source_file, char *log_message, uint32_t log_id)
 {
-  JsonDocument json_log;
+  ApiLogInput input = {
+    .deviceStatusStamp = device_status_stamp,
+    .timestamp = timestamp,
+    .codeline = codeline,
+    .sourceFile = source_file,
+    .logMessage = log_message,
+    .logId = log_id,
+    .filenameCurrent = preferences.getString(PREFERENCES_FILENAME_KEY, ""),
+    .filenameNew = new_filename,
+    .logRetry = log_retry,
+    .retryAttempt = log_retry ? preferences.getInt(PREFERENCES_CONNECT_API_RETRY_COUNT) : 0
+  };
 
-  json_log["creation_timestamp"] = timestamp;
-
-  json_log["device_status_stamp"]["wifi_rssi_level"] = device_status_stamp.wifi_rssi_level;
-  json_log["device_status_stamp"]["wifi_status"] = device_status_stamp.wifi_status;
-  json_log["device_status_stamp"]["refresh_rate"] = device_status_stamp.refresh_rate;
-  json_log["device_status_stamp"]["time_since_last_sleep_start"] = device_status_stamp.time_since_last_sleep;
-  json_log["device_status_stamp"]["current_fw_version"] = device_status_stamp.current_fw_version;
-  json_log["device_status_stamp"]["special_function"] = device_status_stamp.special_function;
-  json_log["device_status_stamp"]["battery_voltage"] = device_status_stamp.battery_voltage;
-  json_log["device_status_stamp"]["wakeup_reason"] = device_status_stamp.wakeup_reason;
-  json_log["device_status_stamp"]["free_heap_size"] = device_status_stamp.free_heap_size;
-  json_log["device_status_stamp"]["max_alloc_size"] = device_status_stamp.max_alloc_size;
-
-  json_log["log_id"] = log_id;
-  json_log["log_message"] = log_message;
-  json_log["log_codeline"] = codeline;
-  json_log["log_sourcefile"] = source_file;
-
-  json_log["additional_info"]["filename_current"] = preferences.getString(PREFERENCES_FILENAME_KEY, "");
-  json_log["additional_info"]["filename_new"] = new_filename.c_str();
-
-  if (log_retry)
-  {
-    json_log["additional_info"]["retry_attempt"] = preferences.getInt(PREFERENCES_CONNECT_API_RETRY_COUNT);
-  }
-
-  serializeJson(json_log, log_array);
-
+  String json_string = serializeRequest_apiLog(input);
+  json_string.toCharArray(log_array, json_string.length() + 1);
   log_POST(log_array, strlen(log_array));
-
   return true;
 }
 
