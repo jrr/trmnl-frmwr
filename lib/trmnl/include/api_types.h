@@ -80,13 +80,14 @@ typedef struct DeviceStatusStamp
   ScreenStatus screen_status;
 
 } DeviceStatusStamp;
+
 struct ApiLogInput
 {
   DeviceStatusStamp deviceStatusStamp;
   time_t timestamp;
   int codeline;
   const char *sourceFile;
-  char *logMessage;
+  const char *logMessage;
   uint32_t logId;
   String filenameCurrent;
   String filenameNew;
