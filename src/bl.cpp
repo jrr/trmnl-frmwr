@@ -48,11 +48,8 @@ bmp_err_e bmp_res = BMP_NOT_BMP;
 bool status = false;          // need to download a new image
 bool update_firmware = false; // need to download a new firmware
 bool reset_firmware = false;  // need to reset credentials
-bool send_log = false;        // need to send logs
-bool double_click = false;
 bool log_retry = false;                                              // need to log connection retry
 esp_sleep_wakeup_cause_t wakeup_reason = ESP_SLEEP_WAKEUP_UNDEFINED; // wake-up reason
-MSG current_msg = NONE;
 SPECIAL_FUNCTION special_function = SF_NONE;
 RTC_DATA_ATTR uint8_t need_to_refresh_display = 1;
 
@@ -120,6 +117,8 @@ void bl_init(void)
 #endif
 
   wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  bool double_click = false;
 
   if (wakeup_reason == ESP_SLEEP_WAKEUP_GPIO)
   {
@@ -266,11 +265,7 @@ void bl_init(void)
     {
       Log.fatal("%s [%d]: Connection failed! WL Status: %d\r\n", __FILE__, __LINE__, WiFi.status());
 
-      if (current_msg != WIFI_FAILED)
-      {
-        showMessageWithLogo(WIFI_FAILED);
-        current_msg = WIFI_FAILED;
-      }
+      showMessageWithLogo(WIFI_FAILED);
 
       submit_log("wifi connection failed, current WL Status: %d", WiFi.status());
 
@@ -866,11 +861,6 @@ static https_request_err_e downloadAndShow()
   {
     Log_error("unable to connect");
     submit_log("unable to connect to the API");
-  }
-
-  if (send_log)
-  {
-    send_log = false;
   }
 
   Log_info("Returned result - %d", result);
