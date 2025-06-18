@@ -80,8 +80,6 @@ static uint8_t *storedLogoOrDefault(void);
 static bool saveCurrentFileName(String &name);
 static bool checkCurrentFileName(String &newName);
 static DeviceStatusStamp getDeviceStatusStamp();
-int submitLog(const char *format, time_t time, int line, const char *file, ...);
-int saveLog(const char *format, time_t time, int line, const char *file, ...);
 void log_nvs_usage();
 
 void wait_for_serial()
