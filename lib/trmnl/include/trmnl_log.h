@@ -1,14 +1,19 @@
 
-#ifdef PIO_UNIT_TESTING
-#include <mock_log.h>
-#else
-#include <ArduinoLog.h>
-#endif
+enum LogLevel
+{
+  LVL_VERBOSE,
+  LVL_INFO,
+  LVL_ERROR,
+  LVL_FATAL
+};
 
-#define Log_verbose(format, ...) Log.verbose("%s [%d]: " format "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+// Platform-specific implementation must be provided by the consuming project
+void trmnl_log(LogLevel level, const char *file, int line, const char *format, ...);
 
-#define Log_info(format, ...) Log.info("%s [%d]: " format "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define Log_verbose(format, ...) trmnl_log(LVL_VERBOSE, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
-#define Log_error(format, ...) Log.error("%s [%d]: " format "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define Log_info(format, ...) trmnl_log(LVL_INFO, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
-#define Log_fatal(format, ...) Log.fatal("%s [%d]: " format "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define Log_error(format, ...) trmnl_log(LVL_ERROR, __FILE__, __LINE__, format, ##__VA_ARGS__)
+
+#define Log_fatal(format, ...) trmnl_log(LVL_FATAL, __FILE__, __LINE__, format, ##__VA_ARGS__)

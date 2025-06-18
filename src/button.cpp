@@ -1,6 +1,7 @@
 #include "trmnl_log.h"
 #include <config.h>
 #include "button.h"
+#include <esp32-hal.h>
 
 ButtonPressResult read_button_presses()
 {
