@@ -341,6 +341,8 @@ void bl_init(void)
 
   log_retry = true;
 
+  submitStoredLogs();
+
   // OTA checking, image checking and drawing
   https_request_err_e request_result = downloadAndShow();
   Log.info("%s [%d]: request result - %d\r\n", __FILE__, __LINE__, request_result);
@@ -349,6 +351,8 @@ void bl_init(void)
   {
     preferences.putInt(PREFERENCES_CONNECT_API_RETRY_COUNT, 1);
   }
+
+  submitStoredLogs();
 
   if (request_result != HTTPS_SUCCESS && request_result != HTTPS_NO_ERR && request_result != HTTPS_NO_REGISTER && request_result != HTTPS_RESET && request_result != HTTPS_PLUGIN_NOT_ATTACHED)
   {
