@@ -81,6 +81,7 @@ static bool saveCurrentFileName(String &name);
 static bool checkCurrentFileName(String &newName);
 static DeviceStatusStamp getDeviceStatusStamp();
 int submitLog(const char *format, time_t time, int line, const char *file, ...);
+int saveLog(const char *format, time_t time, int line, const char *file, ...);
 void log_nvs_usage();
 
 #define submit_log(format, ...) submitLog(format, getTime(), __LINE__, __FILE__, ##__VA_ARGS__);
@@ -2140,6 +2141,39 @@ int submitLog(const char *format, time_t time, int line, const char *file, ...)
   String json_string = serialize_log(input);
 
   submitOrSaveLogString(json_string.c_str(), json_string.length());
+
+  preferences.putUInt(PREFERENCES_LOG_ID_KEY, ++log_id);
+
+  return result;
+}
+int saveLog(const char *format, time_t time, int line, const char *file, ...)
+{
+  uint32_t log_id = preferences.getUInt(PREFERENCES_LOG_ID_KEY, 1);
+
+  char log_message[1024];
+
+  va_list args;
+  va_start(args, file);
+
+  int result = vsnprintf(log_message, sizeof(log_message), format, args);
+
+  va_end(args);
+
+  LogWithDetails input = {
+      .deviceStatusStamp = getDeviceStatusStamp(),
+      .timestamp = time,
+      .codeline = line,
+      .sourceFile = file,
+      .logMessage = log_message,
+      .logId = log_id,
+      .filenameCurrent = preferences.getString(PREFERENCES_FILENAME_KEY, ""),
+      .filenameNew = new_filename,
+      .logRetry = log_retry,
+      .retryAttempt = log_retry ? preferences.getInt(PREFERENCES_CONNECT_API_RETRY_COUNT) : 0};
+
+  String json_string = serialize_log(input);
+
+  storedLogs.store_log(json_string);
 
   preferences.putUInt(PREFERENCES_LOG_ID_KEY, ++log_id);
 
