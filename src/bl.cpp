@@ -2196,3 +2196,11 @@ void log_nvs_usage()
     Log_error("Failed to get NVS stats: %s", esp_err_to_name(ret));
   }
 }
+
+bool shouldReportLog(LogLevel level)
+{
+  // in the future this may be configurable:
+  static const LogLevel REPORT_LOG_THRESHOLD = LVL_ERROR;
+
+  return level >= REPORT_LOG_THRESHOLD;
+}

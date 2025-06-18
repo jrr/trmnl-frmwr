@@ -19,13 +19,14 @@ void trmnl_log(LogLevel level, const char* file, int line, const char* format, .
         break;
     case LVL_ERROR:
         Log.error("%s [%d]: %s\r\n", file, line, buffer);
-        // Also save error logs for later submission
-        saveLog("%s", getTime(), line, file, buffer);
         break;
     case LVL_FATAL:
         Log.fatal("%s [%d]: %s\r\n", file, line, buffer);
-        // Also save fatal logs for later submission
-        saveLog("%s", getTime(), line, file, buffer);
         break;
+    }
+
+    if (shouldReportLog(level))
+    {
+        saveLog("%s", getTime(), line, file, buffer);
     }
 }

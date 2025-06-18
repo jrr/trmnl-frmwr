@@ -1,4 +1,6 @@
 
+#pragma once
+
 enum LogLevel
 {
   LVL_VERBOSE,
