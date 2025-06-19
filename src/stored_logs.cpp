@@ -16,9 +16,7 @@ void store_log(const char *log_buffer, size_t size, Preferences &preferences)
     }
     else
     {
-      Log_info("key %s not exists", key.c_str());
       size_t res = preferences.putString(key.c_str(), log_buffer);
-      Log_info("Initial size %d. Received size - %d", size, res);
       if (res == size)
       {
         Log_info("log note written success");
