@@ -27,6 +27,15 @@ void trmnl_log(LogLevel level, const char* file, int line, const char* format, .
 
     if (shouldReportLog(level))
     {
-        saveLog("%s", getTime(), line, file, buffer);
+        saveLog(level, "%s", getTime(), line, file, buffer);
     }
+}
+
+const char* logLevelToString(LogLevel level) {
+    for (const LogLevelMap &entry : logLevelMap) {
+        if (level == entry.value) {
+            return entry.name;
+        }
+    }
+    return "unknown";
 }

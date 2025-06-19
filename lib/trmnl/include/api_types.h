@@ -83,6 +83,7 @@ typedef struct DeviceStatusStamp
 
 struct LogWithDetails
 {
+  const char *log_level;
   DeviceStatusStamp deviceStatusStamp;
   time_t timestamp;
   int codeline;

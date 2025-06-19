@@ -2060,7 +2060,7 @@ DeviceStatusStamp getDeviceStatusStamp()
   return deviceStatus;
 }
 
-int saveLog(const char *format, time_t time, int line, const char *file, ...)
+int saveLog(LogLevel level, const char *format, time_t time, int line, const char *file, ...)
 {
   uint32_t log_id = preferences.getUInt(PREFERENCES_LOG_ID_KEY, 1);
 
@@ -2074,6 +2074,7 @@ int saveLog(const char *format, time_t time, int line, const char *file, ...)
   va_end(args);
 
   LogWithDetails input = {
+      .log_level = logLevelToString(level),
       .deviceStatusStamp = getDeviceStatusStamp(),
       .timestamp = time,
       .codeline = line,

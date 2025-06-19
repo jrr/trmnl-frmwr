@@ -28,7 +28,7 @@ uint32_t getTime(void);
 /**
  * Persist log to nvram for future submission
  */
-int saveLog(const char *format, time_t time, int line, const char *file, ...);
+int saveLog(LogLevel level, const char *format, time_t time, int line, const char *file, ...);
 
 /**
  * Check if a log level should be reported (saved for submission to server)

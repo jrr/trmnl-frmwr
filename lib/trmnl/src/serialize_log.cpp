@@ -19,6 +19,7 @@ String serialize_log(const LogWithDetails &input)
   json_log["device_status_stamp"]["free_heap_size"] = input.deviceStatusStamp.free_heap_size;
   json_log["device_status_stamp"]["max_alloc_size"] = input.deviceStatusStamp.max_alloc_size;
 
+  json_log["log_level"] = input.log_level;
   json_log["log_id"] = input.logId;
   json_log["log_message"] = input.logMessage;
   json_log["log_codeline"] = input.codeline;
