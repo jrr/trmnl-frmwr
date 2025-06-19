@@ -2117,7 +2117,7 @@ int saveLog(const char *format, time_t time, int line, const char *file, ...)
 
   String json_string = serialize_log(input);
 
-  storedLogs.store_log(json_string);
+  store_log(json_string.c_str(), json_string.length(), preferences);
 
   preferences.putUInt(PREFERENCES_LOG_ID_KEY, ++log_id);
 
