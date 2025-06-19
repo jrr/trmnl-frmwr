@@ -67,7 +67,6 @@ static void checkAndPerformFirmwareUpdate(void);     // OTA update
 static void goToSleep(void);                         // sleep preparing
 static bool setClock(void);                          // clock synchronization
 static float readBatteryVoltage(void);               // battery voltage reading
-static void submitOrSaveLogString(const char *log_buffer, size_t size); // log sending
 static void submitStoredLogs(void);
 static void writeSpecialFunction(SPECIAL_FUNCTION function);
 static void writeImageToFile(const char *name, uint8_t *in_buffer, size_t size);
@@ -1821,35 +1820,6 @@ static float readBatteryVoltage(void)
   float voltage = sensorValue / 1000.0;
   return voltage;
 #endif // FAKE_BATTERY_VOLTAGE
-}
-
-/**
- * @brief Function to send the log note
- * @param log_buffer pointer to the buffer that contains log note
- * @param size size of buffer
- * @return none
- */
-static void submitOrSaveLogString(const char *log_buffer, size_t size)
-{
-  String api_key = "";
-  if (preferences.isKey(PREFERENCES_API_KEY))
-  {
-    api_key = preferences.getString(PREFERENCES_API_KEY, PREFERENCES_API_KEY_DEFAULT);
-    Log.info("%s [%d]: %s key exists. Value - %s\r\n", __FILE__, __LINE__, PREFERENCES_API_KEY, api_key.c_str());
-  }
-  else
-  {
-    Log.error("%s [%d]: %s key not exists.\r\n", __FILE__, __LINE__, PREFERENCES_API_KEY);
-  }
-
-  LogApiInput input{api_key, log_buffer};
-  auto result = submitLogToApi(input, preferences.getString(PREFERENCES_API_URL, API_BASE_URL).c_str());
-  if (!result)
-  {
-    Log_info("Was unable to send log to API; saving locally for later.");
-    // log not send
-    store_log(log_buffer, size, preferences);
-  }
 }
 
 uint32_t getTime(void)
