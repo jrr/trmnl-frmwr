@@ -1,70 +1,46 @@
 #include "stored_logs.h"
 #include "config.h"
 #include "trmnl_log.h"
+#include <ArduinoLog.h>
 
-void store_log(const char *log_buffer, size_t size, Preferences &preferences)
+LogStoreResult store_log(const char *log_buffer, size_t size, Preferences &preferences)
 {
-  bool result = false;
-
+  // Try to find an empty slot first
   for (uint8_t i = 0; i < LOG_MAX_NOTES_NUMBER; i++)
   {
     String key = PREFERENCES_LOG_KEY + String(i);
-    if (preferences.isKey(key.c_str()))
-    {
-      Log_info("key %s exists", key.c_str());
-      result = false;
-    }
-    else
+    if (!preferences.isKey(key.c_str()))
     {
       size_t res = preferences.putString(key.c_str(), log_buffer);
       if (res == size)
       {
-        Log_info("log note written success");
+        return {LogStoreResult::SUCCESS, "Log stored in new slot", i};
       }
       else
       {
-        Log_info("log note writing failed");
+        return {LogStoreResult::WRITE_FAILED, "Failed to write to new slot", i};
       }
-      result = true;
-      break;
     }
   }
-  if (!result)
+  
+  // All slots full, use circular buffer
+  uint8_t head = preferences.getUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, 0);
+  
+  String key = PREFERENCES_LOG_KEY + String(head);
+  size_t res = preferences.putString(key.c_str(), log_buffer);
+  if (res != size)
   {
-    uint8_t head = 0;
-    if (preferences.isKey(PREFERENCES_LOG_BUFFER_HEAD_KEY))
-    {
-      Log_info("head exists");
-      head = preferences.getUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, 0);
-    }
-    else
-    {
-      Log_info("head NOT exists");
-    }
-
-    String key = PREFERENCES_LOG_KEY + String(head);
-    size_t res = preferences.putString(key.c_str(), log_buffer);
-    if (res == size)
-    {
-      Log_info("log note written success");
-    }
-    else
-    {
-      Log_info("log note writing failed");
-    }
-
-    head += 1;
-    if (head == LOG_MAX_NOTES_NUMBER)
-    {
-      head = 0;
-    }
-
-    uint8_t result_write = preferences.putUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, head);
-    if (result_write)
-      Log_info("head written success");
-    else
-      Log_info("head note writing failed");
+    return {LogStoreResult::WRITE_FAILED, "Failed to overwrite slot", head};
   }
+
+  // Update head pointer
+  uint8_t next_head = (head + 1) % LOG_MAX_NOTES_NUMBER;
+  if (!preferences.putUChar(PREFERENCES_LOG_BUFFER_HEAD_KEY, next_head))
+  {
+    return {LogStoreResult::HEAD_UPDATE_FAILED, "Log written but head update failed", head};
+  }
+
+  return {LogStoreResult::SUCCESS, "Log overwritten existing slot", head};
 }
 
 void gather_stored_logs(String &log, Preferences &preferences)

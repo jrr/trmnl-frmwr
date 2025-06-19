@@ -145,6 +145,7 @@ void bl_init(void)
   }
 
   Log_info("preferences start");
+
   bool res = preferences.begin("data", false);
   if (res)
   {
@@ -1808,7 +1809,6 @@ static float readBatteryVoltage(void)
   Log.warning("%s [%d]: FAKE_BATTERY_VOLTAGE is defined. Returning 4.2V.\r\n", __FILE__, __LINE__);
   return 4.2f;
 #else
-  Log.info("%s [%d]: Battery voltage reading...\r\n", __FILE__, __LINE__);
   int32_t adc = 0;
   for (uint8_t i = 0; i < 128; i++)
   {
@@ -1828,7 +1828,6 @@ uint32_t getTime(void)
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo, 200))
   {
-    Log.info("%s [%d]: Failed to obtain time. \r\n", __FILE__, __LINE__);
     return (0);
   }
   time(&now);
@@ -2043,9 +2042,6 @@ DeviceStatusStamp getDeviceStatusStamp()
 {
   DeviceStatusStamp deviceStatus = {};
 
-  char fw_version[30];
-  sprintf(fw_version, "%d.%d.%d", FW_MAJOR_VERSION, FW_MINOR_VERSION, FW_PATCH_VERSION);
-
   deviceStatus.wifi_rssi_level = WiFi.RSSI();
   parseWifiStatusToStr(deviceStatus.wifi_status, sizeof(deviceStatus.wifi_status), WiFi.status());
   deviceStatus.refresh_rate = preferences.getUInt(PREFERENCES_SLEEP_TIME_KEY);
@@ -2062,6 +2058,14 @@ DeviceStatusStamp getDeviceStatusStamp()
 
 int saveLog(LogLevel level, const char *format, time_t time, int line, const char *file, ...)
 {
+  // Recursion guard to prevent infinite logging loops
+  static bool logging_in_progress = false;
+  if (logging_in_progress)
+  {
+    return -1; // Silently fail to prevent recursion
+  }
+  logging_in_progress = true;
+
   uint32_t log_id = preferences.getUInt(PREFERENCES_LOG_ID_KEY, 1);
 
   char log_message[1024];
@@ -2088,10 +2092,17 @@ int saveLog(LogLevel level, const char *format, time_t time, int line, const cha
 
   String json_string = serialize_log(input);
 
-  store_log(json_string.c_str(), json_string.length(), preferences);
+  LogStoreResult store_result = store_log(json_string.c_str(), json_string.length(), preferences);
+  if (store_result.status != LogStoreResult::Status::SUCCESS)
+  {
+    Log_error("Failed to store log: %s", store_result.message);
+    logging_in_progress = false; // Clear guard before returning
+    return -1;
+  }
 
   preferences.putUInt(PREFERENCES_LOG_ID_KEY, ++log_id);
 
+  logging_in_progress = false; // Clear guard before returning
   return result;
 }
 
