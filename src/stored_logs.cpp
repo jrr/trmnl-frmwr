@@ -77,7 +77,6 @@ void gather_stored_logs(String &log, Preferences &preferences)
     String key = PREFERENCES_LOG_KEY + String(i);
     if (preferences.isKey(key.c_str()))
     {
-      Log_info("log note exists");
       String note = preferences.getString(key.c_str(), "");
       if (note.length() > 0)
       {
@@ -95,18 +94,22 @@ void gather_stored_logs(String &log, Preferences &preferences)
 
 void clear_stored_logs(Preferences &preferences)
 {
-
+  int count = 0;
   for (uint8_t i = 0; i < LOG_MAX_NOTES_NUMBER; i++)
   {
     String key = PREFERENCES_LOG_KEY + String(i);
     if (preferences.isKey(key.c_str()))
     {
-      Log_info("log note exists");
       bool note_del = preferences.remove(key.c_str());
       if (note_del)
-        Log_info("log note deleted");
+      {
+        count++;
+      }
       else
-        Log_info("log note not deleted");
+      {
+        Log_error("log note not deleted");
+      }
     }
   }
+  Log_info("Cleared %d stored logs", count);
 }
