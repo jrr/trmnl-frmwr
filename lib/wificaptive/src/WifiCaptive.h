@@ -22,8 +22,6 @@
 #define WIFI_CHANNEL 6
 // Define the maximum number of possible saved credentials
 #define WIFI_MAX_SAVED_CREDS 5
-// Define the maximum number of connection attempts
-#define WIFI_CONNECTION_ATTEMPTS 3
 // Define max connection timeout
 #define CONNECTION_TIMEOUT 15000
 // Local IP URL
@@ -48,8 +46,6 @@ private:
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
-
-    bool tryConnectWithRetries(const String &ssid, const String &password);
 
 public:
     /// @brief Starts WiFi configuration portal.

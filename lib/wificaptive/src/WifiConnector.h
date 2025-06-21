@@ -19,6 +19,8 @@ public:
 
     uint8_t connect(String ssid, String pass);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
+
+    bool tryConnectWithRetries(const String &ssid, const String &password);
 };
 
 #endif

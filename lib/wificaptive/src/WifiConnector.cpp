@@ -2,6 +2,9 @@
 #include "WifiCredentialStore.h"
 #include <trmnl_log.h>
 
+// Define the maximum number of connection attempts
+#define WIFI_CONNECTION_ATTEMPTS 3
+
 WifiConnector::WifiConnector()
 {
 }
@@ -126,4 +129,30 @@ std::vector<Network> WifiConnector::getScannedUniqueNetworks(bool runScan)
     }
 
     return uniqueNetworks;
+}
+
+bool WifiConnector::tryConnectWithRetries(const String &ssid, const String &password)
+{
+    for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
+    {
+        Log_info("Attempt %d to connect to %s", attempt + 1, ssid.c_str());
+        connect(ssid, password);
+
+        // Check if connected
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            Log_info("Connected to %s", ssid.c_str());
+            return true;
+        }
+        WiFi.disconnect();
+
+        // Exponential backoff: 2s, 4s, 8s delays between attempts
+        if (attempt < WIFI_CONNECTION_ATTEMPTS - 1)
+        {
+            uint32_t backoff_delay = 2000 * (1 << attempt); // 2^attempt * 2000ms
+            Log_info("Connection failed, waiting %d ms before retry...", backoff_delay);
+            delay(backoff_delay);
+        }
+    }
+    return false;
 }
