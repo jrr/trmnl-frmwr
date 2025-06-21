@@ -37,7 +37,16 @@ bool WifiCaptive::startPortal()
 
     // configure DSN and WEB server
     _captivePortalServer.setUpDNSServer(localIP);
-    setUpWebserver(*(_captivePortalServer._server), this, localIP);
+    
+    WifiOperationCallbacks callbacks = {
+        .resetSettings = [this](bool runCallback) { this->resetSettings(runCallback); },
+        .setConnectionCredentials = [this](const String& ssid, const String& password, const String& api_server) { 
+            this->setConnectionCredentials(ssid, password, api_server); 
+        },
+        .getAnnotatedNetworks = [this](bool runScan) { return this->getAnnotatedNetworks(runScan); }
+    };
+    
+    setUpWebserver(*(_captivePortalServer._server), callbacks, localIP);
 
     // begin serving
     _captivePortalServer._server->begin();

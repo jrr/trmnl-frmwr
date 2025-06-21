@@ -1,7 +1,7 @@
 #include "WebServer.h"
 
 
-void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAddress &localIP)
+void setUpWebserver(AsyncWebServer &server, WifiOperationCallbacks callbacks, const IPAddress &localIP)
 {
     //======================== Webserver ========================
     // WARNING IOS (and maybe macos) WILL NOT POP UP IF IT CONTAINS THE WORD "Success" https://www.esp8266.com/viewtopic.php?f=34&t=4398
@@ -49,12 +49,12 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 		response->addHeader("Content-Type", "image/svg+xml");
     	request->send(response); });
 
-    server.on("/soft-reset", HTTP_ANY, [&](AsyncWebServerRequest *request)
+    server.on("/soft-reset", HTTP_ANY, [callbacks](AsyncWebServerRequest *request)
               {
-		wifiCaptive->resetSettings(true);
+		callbacks.resetSettings(true);
 		request->send(200); });
 
-    auto scanGET = server.on("/scan", HTTP_GET, [&](AsyncWebServerRequest *request)
+    auto scanGET = server.on("/scan", HTTP_GET, [callbacks](AsyncWebServerRequest *request)
                              {
 		String json = "[";
 		int n = WiFi.scanComplete();
@@ -66,7 +66,7 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 		} else {
 			// Data structure to store the highest RSSI for each SSID
             // Warning: DO NOT USE true on this function in an async context!
-            std::vector<Network> combinedNetworks = wifiCaptive->getAnnotatedNetworks(false);
+            std::vector<Network> combinedNetworks = callbacks.getAnnotatedNetworks(false);
 
             // Generate JSON response
             size_t size = 0;
@@ -104,13 +104,13 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 		request->send(200, "application/json", json);
 		json = String(); });
 
-    AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/connect", [&](AsyncWebServerRequest *request, JsonVariant &json)
+    AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/connect", [callbacks](AsyncWebServerRequest *request, JsonVariant &json)
                                                                            {
 		JsonObject data = json.as<JsonObject>();
 		String ssid = data["ssid"];
 		String pswd = data["pswd"];
         String api_server = data["server"];
-        wifiCaptive->setConnectionCredentials(ssid, pswd, api_server);
+        callbacks.setConnectionCredentials(ssid, pswd, api_server);
         String mac = WiFi.macAddress();
         String message = "{\"ssid\":\"" + ssid + "\",\"mac\":\"" + mac + "\"}";
         request->send(200, "application/json", message); });
