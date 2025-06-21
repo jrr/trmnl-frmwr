@@ -13,8 +13,7 @@ public:
 
     CaptivePortalServer();
     void setUpDNSServer(const IPAddress &localIP);
-    void tearDownDNSServer();
-    void tearDownWebServer();
+    void tearDownServers();
     void begin(WifiOperationCallbacks callbacks); // todo: name?
 };
 

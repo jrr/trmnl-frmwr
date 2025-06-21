@@ -67,8 +67,7 @@ bool WifiCaptive::startPortal()
         _wifiConnector.waitForConnectResult();
     }
 
-    _captivePortalServer.tearDownDNSServer();
-    _captivePortalServer.tearDownWebServer();
+    _captivePortalServer.tearDownServers();
 
     return succesfullyConnected;
 }
