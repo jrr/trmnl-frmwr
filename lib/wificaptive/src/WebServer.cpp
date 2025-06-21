@@ -116,11 +116,9 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 		String ssid = data["ssid"];
 		String pswd = data["pswd"];
         String api_server = data["server"];
-        wifiCaptive->_ssid = ssid;
-        wifiCaptive->_password = pswd;
-        wifiCaptive->_api_server = api_server;
+        wifiCaptive->setConnectionCredentials(ssid, pswd, api_server);
         String mac = WiFi.macAddress();
-        String message = "{\"ssid\":\"" + wifiCaptive->_ssid + "\",\"mac\":\"" + mac + "\"}";
+        String message = "{\"ssid\":\"" + ssid + "\",\"mac\":\"" + mac + "\"}";
         request->send(200, "application/json", message); });
 
     server.addHandler(handler);

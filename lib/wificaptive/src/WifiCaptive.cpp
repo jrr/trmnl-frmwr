@@ -123,4 +123,11 @@ bool WifiCaptive::autoConnect()
     return _wifiConnector.autoConnect(_credentialStore);
 }
 
+void WifiCaptive::setConnectionCredentials(const String& ssid, const String& password, const String& api_server)
+{
+    _ssid = ssid;
+    _password = password;
+    _api_server = api_server;
+}
+
 WifiCaptive WifiCaptivePortal;

@@ -38,11 +38,13 @@ private:
 
     CaptivePortalServer _captivePortalServer;
 
-public:
-    /* ==== vvvv ==== todo : move ==== vvvv ==== */
+private:
     String _ssid = "";
     String _password = "";
     String _api_server = "";
+
+public:
+    /* ==== vvvv ==== todo : move ==== vvvv ==== */
     std::function<void()> _resetcallback;
     WifiConnector _wifiConnector;
     WifiCredentialStore _credentialStore;
@@ -66,6 +68,9 @@ public:
     /// @brief Connects to the saved SSID with the best signal strength
     /// @return True if successfully connected to saved SSID, false otherwise.
     bool autoConnect();
+
+    /// @brief Sets the connection credentials from captive portal
+    void setConnectionCredentials(const String& ssid, const String& password, const String& api_server);
 };
 
 extern WifiCaptive WifiCaptivePortal;
