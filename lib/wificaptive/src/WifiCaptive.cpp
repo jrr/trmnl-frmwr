@@ -134,4 +134,10 @@ void WifiCaptive::setConnectionCredentials(const String& ssid, const String& pas
     _api_server = api_server;
 }
 
+std::vector<Network> WifiCaptive::getAnnotatedNetworks(bool runScan)
+{
+    std::vector<Network> uniqueNetworks = _wifiConnector.getScannedUniqueNetworks(runScan);
+    return _credentialStore.annotateNetworksWithSavedStatus(uniqueNetworks);
+}
+
 WifiCaptive WifiCaptivePortal;

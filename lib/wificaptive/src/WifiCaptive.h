@@ -43,13 +43,10 @@ private:
     String _password = "";
     String _api_server = "";
     std::function<void()> _resetcallback;
-
-public:
-    /* ==== vvvv ==== todo : move ==== vvvv ==== */
     WifiConnector _wifiConnector;
     WifiCredentialStore _credentialStore;
-    /* ========================================== */
 
+public:
     /// @brief Starts WiFi configuration portal.
     /// @return True if successfully connected to provided SSID, false otherwise.
     bool startPortal();
@@ -71,6 +68,9 @@ public:
 
     /// @brief Sets the connection credentials from captive portal
     void setConnectionCredentials(const String& ssid, const String& password, const String& api_server);
+
+    /// @brief Gets scanned networks annotated with saved status
+    std::vector<Network> getAnnotatedNetworks(bool runScan = false);
 };
 
 extern WifiCaptive WifiCaptivePortal;

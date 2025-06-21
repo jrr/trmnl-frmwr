@@ -66,9 +66,7 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 		} else {
 			// Data structure to store the highest RSSI for each SSID
             // Warning: DO NOT USE true on this function in an async context!
-            std::vector<Network> uniqueNetworks = wifiCaptive->_wifiConnector.getScannedUniqueNetworks(false);
-            std::vector<Network> combinedNetworks =
-                wifiCaptive->_credentialStore.annotateNetworksWithSavedStatus(uniqueNetworks);
+            std::vector<Network> combinedNetworks = wifiCaptive->getAnnotatedNetworks(false);
 
             // Generate JSON response
             size_t size = 0;
