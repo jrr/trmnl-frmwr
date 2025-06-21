@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
+#include <vector>
 
 #define WIFI_MAX_SAVED_CREDS 5
 #define WIFI_SSID_KEY(i) ("wifi_" + String(i) + "_ssid").c_str()
@@ -16,11 +17,17 @@ struct WifiCreds
     String pswd;
 };
 
+struct Network
+{
+    String ssid;
+    int32_t rssi;
+    bool open;
+    bool saved;
+};
+
 class WifiCredentialStore
 {
 public:
-    WifiCreds _savedWifis[WIFI_MAX_SAVED_CREDS];
-    
     WifiCredentialStore();
     void readCredentials();
     bool hasCredentials();
@@ -37,9 +44,15 @@ public:
 
     void saveApiServer(String url);
     void clearSavedApiUrl();
+    
+    // High-level semantic methods
+    std::vector<WifiCreds> getPrioritizedCredentials(std::vector<Network>& scanResults);
+    std::vector<Network> annotateNetworksWithSavedStatus(std::vector<Network>& scanResults);
 
 private:
     void saveLastUsedWifiIndex(int index);
+
+    WifiCreds _savedWifis[WIFI_MAX_SAVED_CREDS];
 };
 
 #endif

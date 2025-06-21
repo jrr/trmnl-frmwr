@@ -1,5 +1,6 @@
 #include "WifiCredentialStore.h"
 #include <trmnl_log.h>
+#include <algorithm>
 
 WifiCredentialStore::WifiCredentialStore()
 {
@@ -183,4 +184,75 @@ bool WifiCredentialStore::hasLastUsedCredential()
         return _savedWifis[index].ssid != "";
     }
     return false;
+}
+
+std::vector<WifiCreds> WifiCredentialStore::getPrioritizedCredentials(std::vector<Network>& scanResults)
+{
+
+    // sort scan results by RSSI
+    std::sort(scanResults.begin(), scanResults.end(), [](const Network &a, const Network &b)
+              { return a.rssi > b.rssi; });
+
+    std::vector<WifiCreds> sortedWifis;
+    for (auto &network : scanResults)
+    {
+        for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
+        {
+            if (network.ssid == _savedWifis[i].ssid)
+            {
+                sortedWifis.push_back(_savedWifis[i]);
+            }
+        }
+    }
+
+    if (sortedWifis.empty())
+    {
+        for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
+        {
+            sortedWifis.push_back(_savedWifis[i]);
+        }
+    }
+
+    return sortedWifis;
+}
+
+std::vector<Network> WifiCredentialStore::annotateNetworksWithSavedStatus(std::vector<Network>& scanResults)
+{
+    std::vector<Network> combinedNetworks;
+    for (auto &network : scanResults)
+    {
+        bool found = false;
+        for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
+        {
+            if (network.ssid == _savedWifis[i].ssid)
+            {
+                combinedNetworks.push_back({network.ssid, network.rssi, network.open, true});
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            combinedNetworks.push_back({network.ssid, network.rssi, network.open, false});
+        }
+    }
+    // add saved wifis that are not combinedNetworks
+    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
+    {
+        bool found = false;
+        for (auto &network : combinedNetworks)
+        {
+            if (network.ssid == _savedWifis[i].ssid)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found && _savedWifis[i].ssid != "")
+        {
+            combinedNetworks.push_back({_savedWifis[i].ssid, -200, false, true});
+        }
+    }
+
+    return combinedNetworks;
 }

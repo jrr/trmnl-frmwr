@@ -34,14 +34,6 @@
 class WifiCaptive
 {
 private:
-    struct Network
-    {
-        String ssid;
-        int32_t rssi;
-        bool open;
-        bool saved;
-    };
-
     DNSServer *_dnsServer;
     AsyncWebServer *_server;
     String _ssid = "";
@@ -57,9 +49,7 @@ private:
     uint8_t connect(String ssid, String pass);
     uint8_t waitForConnectResult(uint32_t timeout);
     uint8_t waitForConnectResult();
-    std::vector<WifiCreds> matchNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
-    std::vector<Network> combineNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
 
 public:
     /// @brief Starts WiFi configuration portal.
