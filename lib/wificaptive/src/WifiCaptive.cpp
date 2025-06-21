@@ -176,7 +176,7 @@ bool WifiCaptive::startPortal()
     // start async network scan
     WiFi.scanNetworks(true);
 
-    readWifiCredentials();
+    _credentialStore.readCredentials();
 
     bool succesfullyConnected = false;
     // wait until SSID is provided
@@ -193,7 +193,7 @@ bool WifiCaptive::startPortal()
             bool res = connect(_ssid, _password) == WL_CONNECTED;
             if (res)
             {
-                saveWifiCredentials(_ssid, _password);
+                _credentialStore.saveWifiCredentials(_ssid, _password);
                 saveApiServer(_api_server);
                 succesfullyConnected = true;
                 break;
@@ -313,53 +313,8 @@ void WifiCaptive::setResetSettingsCallback(std::function<void()> func)
 
 bool WifiCaptive::isSaved()
 {
-    readWifiCredentials();
-    return _savedWifis[0].ssid != "";
-}
-
-void WifiCaptive::readWifiCredentials()
-{
-    Preferences preferences;
-    preferences.begin("wificaptive", true);
-
-    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
-    {
-        _savedWifis[i].ssid = preferences.getString(WIFI_SSID_KEY(i), "");
-        _savedWifis[i].pswd = preferences.getString(WIFI_PSWD_KEY(i), "");
-    }
-
-    preferences.end();
-}
-
-void WifiCaptive::saveWifiCredentials(String ssid, String pass)
-{
-    Log_info("Saving wifi credentials: %s", ssid.c_str());
-
-    // Check if the credentials already exist
-    for (u16_t i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
-    {
-        if (_savedWifis[i].ssid == ssid && _savedWifis[i].pswd == pass)
-        {
-            return; // Avoid saving duplicate networks
-        }
-    }
-
-    for (u16_t i = WIFI_MAX_SAVED_CREDS - 1; i > 0; i--)
-    {
-        _savedWifis[i] = _savedWifis[i - 1];
-    }
-
-    _savedWifis[0] = {ssid, pass};
-
-    Preferences preferences;
-    preferences.begin("wificaptive", false);
-    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
-    {
-        preferences.putString(WIFI_SSID_KEY(i), _savedWifis[i].ssid);
-        preferences.putString(WIFI_PSWD_KEY(i), _savedWifis[i].pswd);
-    }
-    preferences.putInt(WIFI_LAST_INDEX, 0);
-    preferences.end();
+    _credentialStore.readCredentials();
+    return _credentialStore._savedWifis[0].ssid != "";
 }
 
 void WifiCaptive::saveLastUsedWifiIndex(int index)
@@ -376,8 +331,8 @@ void WifiCaptive::saveLastUsedWifiIndex(int index)
     // if index is greater than the total number of saved wifis, set to 0
     if (index > 0)
     {
-        readWifiCredentials();
-        if (_savedWifis[index].ssid == "")
+        _credentialStore.readCredentials();
+        if (_credentialStore._savedWifis[index].ssid == "")
         {
             index = 0;
         }
@@ -400,8 +355,8 @@ int WifiCaptive::readLastUsedWifiIndex()
     // if index is greater than the total number of saved wifis, set to 0
     if (index > 0)
     {
-        readWifiCredentials();
-        if (_savedWifis[index].ssid == "")
+        _credentialStore.readCredentials();
+        if (_credentialStore._savedWifis[index].ssid == "")
         {
             index = 0;
         }
@@ -569,7 +524,7 @@ std::vector<WifiCaptive::Network> WifiCaptive::combineNetworks(
 bool WifiCaptive::autoConnect()
 {
     Log_info("Trying to autoconnect to wifi...");
-    readWifiCredentials();
+    _credentialStore.readCredentials();
 
     // if last used network is available, try to connect to it
     int last_used_index = readLastUsedWifiIndex();
