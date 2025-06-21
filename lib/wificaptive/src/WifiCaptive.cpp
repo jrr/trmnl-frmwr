@@ -259,48 +259,7 @@ bool WifiCaptive::isSaved()
 
 bool WifiCaptive::autoConnect()
 {
-    Log_info("Trying to autoconnect to wifi...");
-    _credentialStore.readCredentials();
-
-    // if last used network is available, try to connect to it
-    if (_credentialStore.hasLastUsedCredential())
-    {
-        WifiCreds lastUsed = _credentialStore.getLastUsedCredential();
-        Log_info("Trying to connect to last used %s...", lastUsed.ssid.c_str());
-        WiFi.setSleep(0);
-        WiFi.setMinSecurity(WIFI_AUTH_OPEN);
-        WiFi.mode(WIFI_STA);
-
-        if (_wifiConnector.tryConnectWithRetries(lastUsed.ssid, lastUsed.pswd))
-        {
-            return true;
-        }
-    }
-
-    Log_info("Last used network unavailable, scanning for known networks...");
-    std::vector<Network> scanResults = _wifiConnector.getScannedUniqueNetworks(true);
-    std::vector<WifiCreds> sortedNetworks = _credentialStore.getPrioritizedCredentials(scanResults);
-
-    WiFi.mode(WIFI_STA);
-    WifiCreds lastUsed = _credentialStore.getLastUsedCredential();
-    for (auto &network : sortedNetworks)
-    {
-        if (network.ssid == "" || (network.ssid == lastUsed.ssid && network.pswd == lastUsed.pswd))
-        {
-            continue;
-        }
-
-        Log_info("Trying to connect to saved network %s...", network.ssid.c_str());
-
-        if (_wifiConnector.tryConnectWithRetries(network.ssid, network.pswd))
-        {
-            _credentialStore.saveLastUsedSsid(network.ssid);
-            return true;
-        }
-    }
-
-    Log_info("Failed to connect to any network");
-    return false;
+    return _wifiConnector.autoConnect(_credentialStore);
 }
 
 WifiCaptive WifiCaptivePortal;

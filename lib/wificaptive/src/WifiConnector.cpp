@@ -156,3 +156,49 @@ bool WifiConnector::tryConnectWithRetries(const String &ssid, const String &pass
     }
     return false;
 }
+
+bool WifiConnector::autoConnect(WifiCredentialStore &credentialStore)
+{
+    Log_info("Trying to autoconnect to wifi...");
+    credentialStore.readCredentials();
+
+    // if last used network is available, try to connect to it
+    if (credentialStore.hasLastUsedCredential())
+    {
+        WifiCreds lastUsed = credentialStore.getLastUsedCredential();
+        Log_info("Trying to connect to last used %s...", lastUsed.ssid.c_str());
+        WiFi.setSleep(0);
+        WiFi.setMinSecurity(WIFI_AUTH_OPEN);
+        WiFi.mode(WIFI_STA);
+
+        if (tryConnectWithRetries(lastUsed.ssid, lastUsed.pswd))
+        {
+            return true;
+        }
+    }
+
+    Log_info("Last used network unavailable, scanning for known networks...");
+    std::vector<Network> scanResults = getScannedUniqueNetworks(true);
+    std::vector<WifiCreds> sortedNetworks = credentialStore.getPrioritizedCredentials(scanResults);
+
+    WiFi.mode(WIFI_STA);
+    WifiCreds lastUsed = credentialStore.getLastUsedCredential();
+    for (auto &network : sortedNetworks)
+    {
+        if (network.ssid == "" || (network.ssid == lastUsed.ssid && network.pswd == lastUsed.pswd))
+        {
+            continue;
+        }
+
+        Log_info("Trying to connect to saved network %s...", network.ssid.c_str());
+
+        if (tryConnectWithRetries(network.ssid, network.pswd))
+        {
+            credentialStore.saveLastUsedSsid(network.ssid);
+            return true;
+        }
+    }
+
+    Log_info("Failed to connect to any network");
+    return false;
+}
