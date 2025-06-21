@@ -257,6 +257,32 @@ bool WifiCaptive::isSaved()
     return _credentialStore.hasCredentials();
 }
 
+bool WifiCaptive::tryConnectWithRetries(const String &ssid, const String &password)
+{
+    for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
+    {
+        Log_info("Attempt %d to connect to %s", attempt + 1, ssid.c_str());
+        _wifiConnector.connect(ssid, password);
+
+        // Check if connected
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            Log_info("Connected to %s", ssid.c_str());
+            return true;
+        }
+        WiFi.disconnect();
+
+        // Exponential backoff: 2s, 4s, 8s delays between attempts
+        if (attempt < WIFI_CONNECTION_ATTEMPTS - 1)
+        {
+            uint32_t backoff_delay = 2000 * (1 << attempt); // 2^attempt * 2000ms
+            Log_info("Connection failed, waiting %d ms before retry...", backoff_delay);
+            delay(backoff_delay);
+        }
+    }
+    return false;
+}
+
 bool WifiCaptive::autoConnect()
 {
     Log_info("Trying to autoconnect to wifi...");
@@ -271,25 +297,9 @@ bool WifiCaptive::autoConnect()
         WiFi.setMinSecurity(WIFI_AUTH_OPEN);
         WiFi.mode(WIFI_STA);
 
-        for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
+        if (tryConnectWithRetries(lastUsed.ssid, lastUsed.pswd))
         {
-            Log_info("Attempt %d to connect to %s", attempt + 1, lastUsed.ssid.c_str());
-            _wifiConnector.connect(lastUsed.ssid, lastUsed.pswd);
-
-            // Check if connected
-            if (WiFi.status() == WL_CONNECTED)
-            {
-                Log_info("Connected to %s", lastUsed.ssid.c_str());
-                return true;
-            }
-            WiFi.disconnect();
-            
-            // Exponential backoff: 2s, 4s, 8s delays between attempts
-            if (attempt < WIFI_CONNECTION_ATTEMPTS - 1) {
-                uint32_t backoff_delay = 2000 * (1 << attempt); // 2^attempt * 2000ms
-                Log_info("Connection failed, waiting %d ms before retry...", backoff_delay);
-                delay(backoff_delay);
-            }
+            return true;
         }
     }
 
@@ -308,27 +318,10 @@ bool WifiCaptive::autoConnect()
 
         Log_info("Trying to connect to saved network %s...", network.ssid.c_str());
 
-        for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
+        if (tryConnectWithRetries(network.ssid, network.pswd))
         {
-            Log_info("Attempt %d to connect to %s", attempt + 1, network.ssid.c_str());
-            _wifiConnector.connect(network.ssid, network.pswd);
-
-            // Check if connected
-            if (WiFi.status() == WL_CONNECTED)
-            {
-                Log_info("Connected to %s", network.ssid.c_str());
-                // success! save the last used network
-                _credentialStore.saveLastUsedSsid(network.ssid);
-                return true;
-            }
-            WiFi.disconnect();
-            
-            // Exponential backoff: 2s, 4s, 8s delays between attempts
-            if (attempt < WIFI_CONNECTION_ATTEMPTS - 1) {
-                uint32_t backoff_delay = 2000 * (1 << attempt); // 2^attempt * 2000ms
-                Log_info("Connection failed, waiting %d ms before retry...", backoff_delay);
-                delay(backoff_delay);
-            }
+            _credentialStore.saveLastUsedSsid(network.ssid);
+            return true;
         }
     }
 

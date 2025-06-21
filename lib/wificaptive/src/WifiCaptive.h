@@ -49,6 +49,8 @@ private:
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
 
+    bool tryConnectWithRetries(const String &ssid, const String &password);
+
 public:
     /// @brief Starts WiFi configuration portal.
     /// @return True if successfully connected to provided SSID, false otherwise.
