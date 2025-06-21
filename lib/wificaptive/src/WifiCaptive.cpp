@@ -194,7 +194,7 @@ bool WifiCaptive::startPortal()
             if (res)
             {
                 _credentialStore.saveWifiCredentials(_ssid, _password);
-                saveApiServer(_api_server);
+                _credentialStore.saveApiServer(_api_server);
                 succesfullyConnected = true;
                 break;
             }
@@ -239,21 +239,8 @@ bool WifiCaptive::startPortal()
 
 void WifiCaptive::resetSettings()
 {
-    Preferences preferences;
-    preferences.begin("wificaptive", false);
-    preferences.remove("api_url");
-    preferences.remove(WIFI_LAST_INDEX);
-    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
-    {
-        preferences.remove(WIFI_SSID_KEY(i));
-        preferences.remove(WIFI_PSWD_KEY(i));
-    }
-    preferences.end();
-
-    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
-    {
-        _savedWifis[i] = {"", ""};
-    }
+    _credentialStore.clearSavedWifiCredentials();
+    _credentialStore.clearSavedApiUrl();
 
     WiFi.disconnect(true, true);
 }
@@ -315,65 +302,6 @@ bool WifiCaptive::isSaved()
 {
     _credentialStore.readCredentials();
     return _credentialStore._savedWifis[0].ssid != "";
-}
-
-void WifiCaptive::saveLastUsedWifiIndex(int index)
-{
-    Preferences preferences;
-    preferences.begin("wificaptive", false);
-
-    // if index is out of bounds, set to 0
-    if (index < 0 || index >= WIFI_MAX_SAVED_CREDS)
-    {
-        index = 0;
-    }
-
-    // if index is greater than the total number of saved wifis, set to 0
-    if (index > 0)
-    {
-        _credentialStore.readCredentials();
-        if (_credentialStore._savedWifis[index].ssid == "")
-        {
-            index = 0;
-        }
-    }
-
-    preferences.putInt(WIFI_LAST_INDEX, index);
-}
-
-int WifiCaptive::readLastUsedWifiIndex()
-{
-    Preferences preferences;
-    preferences.begin("wificaptive", true);
-    int index = preferences.getInt(WIFI_LAST_INDEX, 0);
-    // if index is out of range, return 0
-    if (index < 0 || index >= WIFI_MAX_SAVED_CREDS)
-    {
-        index = 0;
-    }
-
-    // if index is greater than the total number of saved wifis, set to 0
-    if (index > 0)
-    {
-        _credentialStore.readCredentials();
-        if (_credentialStore._savedWifis[index].ssid == "")
-        {
-            index = 0;
-        }
-    }
-    preferences.end();
-    return index;
-}
-
-void WifiCaptive::saveApiServer(String url)
-{
-    // if not URL is provided, don't save a preference and fall back to API_BASE_URL in config.h
-    if (url == "")
-        return;
-    Preferences preferences;
-    preferences.begin("data", false);
-    preferences.putString("api_url", url);
-    preferences.end();
 }
 
 std::vector<WifiCaptive::Network> WifiCaptive::getScannedUniqueNetworks(bool runScan)
@@ -527,7 +455,7 @@ bool WifiCaptive::autoConnect()
     _credentialStore.readCredentials();
 
     // if last used network is available, try to connect to it
-    int last_used_index = readLastUsedWifiIndex();
+    int last_used_index = _credentialStore.readLastUsedWifiIndex();
 
     if (_savedWifis[last_used_index].ssid != "")
     {
@@ -592,7 +520,7 @@ bool WifiCaptive::autoConnect()
                 {
                     if (_savedWifis[i].ssid == network.ssid)
                     {
-                        saveLastUsedWifiIndex(i);
+                        _credentialStore.saveLastUsedWifiIndex(i);
                         break;
                     }
                 }

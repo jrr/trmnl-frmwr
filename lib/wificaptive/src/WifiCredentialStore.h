@@ -25,6 +25,14 @@ public:
     void readCredentials();
 
     void saveWifiCredentials(String ssid, String pass);
+
+    void clearSavedWifiCredentials();
+
+    void saveLastUsedWifiIndex(int index);
+    int readLastUsedWifiIndex();
+
+    void saveApiServer(String url);
+    void clearSavedApiUrl();
 };
 
 #endif

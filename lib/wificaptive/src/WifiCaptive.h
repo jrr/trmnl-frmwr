@@ -6,7 +6,6 @@
 #include <ESPAsyncWebServer.h> //https://github.com/me-no-dev/ESPAsyncWebServer using the latest dev version from @me-no-dev
 #include <esp_wifi.h>          //Used for mpdu_rx_disable android workaround
 #include <AsyncJson.h>
-#include "Preferences.h"
 #include "WifiCaptivePage.h"
 #include <ArduinoJson.h>
 #include "WifiCredentialStore.h"
@@ -59,9 +58,6 @@ private:
     uint8_t connect(String ssid, String pass);
     uint8_t waitForConnectResult(uint32_t timeout);
     uint8_t waitForConnectResult();
-    void saveLastUsedWifiIndex(int index);
-    int readLastUsedWifiIndex();
-    void saveApiServer(String url);
     std::vector<WifiCreds> matchNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
     std::vector<Network> combineNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
