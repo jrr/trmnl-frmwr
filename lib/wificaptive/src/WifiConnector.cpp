@@ -32,3 +32,17 @@ uint8_t WifiConnector::waitForConnectResult()
 {
     return waitForConnectResult(CONNECTION_TIMEOUT);
 }
+
+uint8_t WifiConnector::connect(String ssid, String pass)
+{
+    uint8_t connRes = (uint8_t)WL_NO_SSID_AVAIL;
+
+    if (ssid != "")
+    {
+        WiFi.enableSTA(true);
+        WiFi.begin(ssid.c_str(), pass.c_str());
+        connRes = waitForConnectResult();
+    }
+
+    return connRes;
+}

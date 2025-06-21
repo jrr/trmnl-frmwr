@@ -14,6 +14,8 @@ public:
     // Connection helper methods
     uint8_t waitForConnectResult(uint32_t timeout);
     uint8_t waitForConnectResult();
+
+    uint8_t connect(String ssid, String pass);
 };
 
 #endif

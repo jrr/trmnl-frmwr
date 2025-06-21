@@ -48,7 +48,6 @@ private:
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
-    uint8_t connect(String ssid, String pass);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
 
 public:

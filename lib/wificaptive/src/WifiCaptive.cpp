@@ -191,7 +191,7 @@ bool WifiCaptive::startPortal()
         }
         else
         {
-            bool res = connect(_ssid, _password) == WL_CONNECTED;
+            bool res = _wifiConnector.connect(_ssid, _password) == WL_CONNECTED;
             if (res)
             {
                 _credentialStore.saveWifiCredentials(_ssid, _password);
@@ -244,20 +244,6 @@ void WifiCaptive::resetSettings()
     _credentialStore.clearSavedApiUrl();
 
     WiFi.disconnect(true, true);
-}
-
-uint8_t WifiCaptive::connect(String ssid, String pass)
-{
-    uint8_t connRes = (uint8_t)WL_NO_SSID_AVAIL;
-
-    if (ssid != "")
-    {
-        WiFi.enableSTA(true);
-        WiFi.begin(ssid.c_str(), pass.c_str());
-        connRes = _wifiConnector.waitForConnectResult();
-    }
-
-    return connRes;
 }
 
 void WifiCaptive::setResetSettingsCallback(std::function<void()> func)
@@ -367,7 +353,7 @@ bool WifiCaptive::autoConnect()
         for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
         {
             Log_info("Attempt %d to connect to %s", attempt + 1, lastUsed.ssid.c_str());
-            connect(lastUsed.ssid, lastUsed.pswd);
+            _wifiConnector.connect(lastUsed.ssid, lastUsed.pswd);
 
             // Check if connected
             if (WiFi.status() == WL_CONNECTED)
@@ -404,7 +390,7 @@ bool WifiCaptive::autoConnect()
         for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
         {
             Log_info("Attempt %d to connect to %s", attempt + 1, network.ssid.c_str());
-            connect(network.ssid, network.pswd);
+            _wifiConnector.connect(network.ssid, network.pswd);
 
             // Check if connected
             if (WiFi.status() == WL_CONNECTED)
