@@ -35,7 +35,7 @@ class WifiCaptive
 {
 private:
     // DNSServer *_dnsServer;
-    AsyncWebServer *_server;
+    // AsyncWebServer *_server;
     String _ssid = "";
     String _password = "";
     String _api_server = "";

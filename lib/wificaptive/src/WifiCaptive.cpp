@@ -131,7 +131,7 @@ void WifiCaptive::setUpWebserver(AsyncWebServer &server, const IPAddress &localI
 bool WifiCaptive::startPortal()
 {
     _captivePortalServer._dnsServer = new DNSServer();
-    _server = new AsyncWebServer(80);
+    _captivePortalServer._server = new AsyncWebServer(80);
 
     // Set the WiFi mode to access point and station
     WiFi.mode(WIFI_MODE_AP);
@@ -163,10 +163,10 @@ bool WifiCaptive::startPortal()
 
     // configure DSN and WEB server
     _captivePortalServer.setUpDNSServer(localIP);
-    setUpWebserver(*_server, localIP);
+    setUpWebserver(*(_captivePortalServer._server), localIP);
 
     // begin serving
-    _server->begin();
+    _captivePortalServer._server->begin();
 
     // start async network scan
     WiFi.scanNetworks(true);
@@ -222,9 +222,9 @@ bool WifiCaptive::startPortal()
     _captivePortalServer.tearDownDNSServer();
 
     // stop server
-    _server->end();
-    delete _server;
-    _server = nullptr;
+    _captivePortalServer._server->end();
+    delete _captivePortalServer._server;
+    _captivePortalServer._server = nullptr;
 
     return succesfullyConnected;
 }
