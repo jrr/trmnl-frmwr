@@ -8,6 +8,8 @@
 #define MAX_CLIENTS 1
 // Define the WiFi channel to be used (channel 6 in this case)
 #define WIFI_CHANNEL 6
+// Define the DNS interval in milliseconds between processing DNS requests
+#define DNS_INTERVAL 60
 
 CaptivePortalServer::CaptivePortalServer()
 {
@@ -69,4 +71,47 @@ void CaptivePortalServer::begin(WifiOperationCallbacks callbacks)
 
     // begin serving
     _server->begin();
+
+    // start async network scan
+    WiFi.scanNetworks(true);
+}
+bool CaptivePortalServer::runCaptivePortal(WifiCredentialStore *credentialStore, WifiConnector *wifiConnector)
+{
+    while (1)
+    {
+        _dnsServer->processNextRequest();
+
+        if (_ssid == "")
+        {
+            delay(DNS_INTERVAL);
+        }
+        else
+        {
+            bool res = wifiConnector->connect(_ssid, _password) == WL_CONNECTED;
+            if (res)
+            {
+                credentialStore->saveWifiCredentials(_ssid, _password);
+                credentialStore->saveApiServer(_api_server);
+                return true;
+                break;
+            }
+            else
+            {
+                _ssid = "";
+                _password = "";
+
+                WiFi.disconnect();
+                WiFi.enableSTA(false);
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+void CaptivePortalServer::setConnectionCredentials(const String &ssid, const String &password, const String &api_server)
+{
+    _ssid = ssid;
+    _password = password;
+    _api_server = api_server;
 }

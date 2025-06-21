@@ -11,8 +11,6 @@
 #include "WifiConnector.h"
 #include "CaptivePortalServer.h"
 
-// Define the DNS interval in milliseconds between processing DNS requests
-#define DNS_INTERVAL 60
 // Define the maximum number of possible saved credentials
 #define WIFI_MAX_SAVED_CREDS 5
 // Define max connection timeout
@@ -32,9 +30,6 @@ private:
     CaptivePortalServer _captivePortalServer;
 
 private:
-    String _ssid = "";
-    String _password = "";
-    String _api_server = "";
     std::function<void()> _resetcallback;
     WifiConnector _wifiConnector;
     WifiCredentialStore _credentialStore;
@@ -43,6 +38,8 @@ public:
     /// @brief Starts WiFi configuration portal.
     /// @return True if successfully connected to provided SSID, false otherwise.
     bool startPortal();
+
+    void moreStuff();
 
     /// @brief Checks if any ssid is saved
     /// @return True if any ssis is saved, false otherwise
@@ -58,9 +55,6 @@ public:
     /// @brief Connects to the saved SSID with the best signal strength
     /// @return True if successfully connected to saved SSID, false otherwise.
     bool autoConnect();
-
-    /// @brief Sets the connection credentials from captive portal
-    void setConnectionCredentials(const String& ssid, const String& password, const String& api_server);
 
     /// @brief Gets scanned networks annotated with saved status
     std::vector<Network> getAnnotatedNetworks(bool runScan = false);
