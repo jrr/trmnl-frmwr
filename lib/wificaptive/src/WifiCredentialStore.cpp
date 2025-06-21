@@ -138,3 +138,29 @@ void WifiCredentialStore::clearSavedApiUrl()
     preferences.remove("api_url");
     preferences.end();
 }
+
+bool WifiCredentialStore::hasCredentials()
+{
+    return _savedWifis[0].ssid != "";
+}
+
+int WifiCredentialStore::findCredentialIndex(const String& ssid)
+{
+    for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
+    {
+        if (_savedWifis[i].ssid == ssid)
+        {
+            return i;
+        }
+    }
+    return -1; // not found
+}
+
+void WifiCredentialStore::saveLastUsedSsid(const String& ssid)
+{
+    int index = findCredentialIndex(ssid);
+    if (index != -1)
+    {
+        saveLastUsedWifiIndex(index);
+    }
+}

@@ -23,16 +23,21 @@ public:
     
     WifiCredentialStore();
     void readCredentials();
+    bool hasCredentials();
+    int findCredentialIndex(const String &ssid);
 
     void saveWifiCredentials(String ssid, String pass);
 
     void clearSavedWifiCredentials();
 
-    void saveLastUsedWifiIndex(int index);
     int readLastUsedWifiIndex();
+    void saveLastUsedSsid(const String &ssid);
 
     void saveApiServer(String url);
     void clearSavedApiUrl();
+
+private:
+    void saveLastUsedWifiIndex(int index);
 };
 
 #endif

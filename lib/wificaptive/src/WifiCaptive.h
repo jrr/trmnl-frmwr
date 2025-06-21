@@ -50,7 +50,6 @@ private:
 
     std::function<void()> _resetcallback;
 
-    WifiCreds _savedWifis[WIFI_MAX_SAVED_CREDS];
     WifiCredentialStore _credentialStore;
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
