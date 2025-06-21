@@ -25,6 +25,8 @@ public:
     void readCredentials();
     bool hasCredentials();
     int findCredentialIndex(const String &ssid);
+    WifiCreds getLastUsedCredential();
+    bool hasLastUsedCredential();
 
     void saveWifiCredentials(String ssid, String pass);
 

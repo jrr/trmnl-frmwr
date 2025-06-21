@@ -455,24 +455,23 @@ bool WifiCaptive::autoConnect()
     _credentialStore.readCredentials();
 
     // if last used network is available, try to connect to it
-    int last_used_index = _credentialStore.readLastUsedWifiIndex();
-
-    if (_credentialStore._savedWifis[last_used_index].ssid != "")
+    if (_credentialStore.hasLastUsedCredential())
     {
-        Log_info("Trying to connect to last used %s...", _credentialStore._savedWifis[last_used_index].ssid.c_str());
+        WifiCreds lastUsed = _credentialStore.getLastUsedCredential();
+        Log_info("Trying to connect to last used %s...", lastUsed.ssid.c_str());
         WiFi.setSleep(0);
         WiFi.setMinSecurity(WIFI_AUTH_OPEN);
         WiFi.mode(WIFI_STA);
 
         for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
         {
-            Log_info("Attempt %d to connect to %s", attempt + 1, _credentialStore._savedWifis[last_used_index].ssid.c_str());
-            connect(_credentialStore._savedWifis[last_used_index].ssid, _credentialStore._savedWifis[last_used_index].pswd);
+            Log_info("Attempt %d to connect to %s", attempt + 1, lastUsed.ssid.c_str());
+            connect(lastUsed.ssid, lastUsed.pswd);
 
             // Check if connected
             if (WiFi.status() == WL_CONNECTED)
             {
-                Log_info("Connected to %s", _credentialStore._savedWifis[last_used_index].ssid.c_str());
+                Log_info("Connected to %s", lastUsed.ssid.c_str());
                 return true;
             }
             WiFi.disconnect();
@@ -497,9 +496,10 @@ bool WifiCaptive::autoConnect()
     }
 
     WiFi.mode(WIFI_STA);
+    WifiCreds lastUsed = _credentialStore.getLastUsedCredential();
     for (auto &network : sortedNetworks)
     {
-        if (network.ssid == "" || (network.ssid == _credentialStore._savedWifis[last_used_index].ssid && network.pswd == _credentialStore._savedWifis[last_used_index].pswd))
+        if (network.ssid == "" || (network.ssid == lastUsed.ssid && network.pswd == lastUsed.pswd))
         {
             continue;
         }

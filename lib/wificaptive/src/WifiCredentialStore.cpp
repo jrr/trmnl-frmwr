@@ -164,3 +164,23 @@ void WifiCredentialStore::saveLastUsedSsid(const String& ssid)
         saveLastUsedWifiIndex(index);
     }
 }
+
+WifiCreds WifiCredentialStore::getLastUsedCredential()
+{
+    int index = readLastUsedWifiIndex();
+    if (index >= 0 && index < WIFI_MAX_SAVED_CREDS)
+    {
+        return _savedWifis[index];
+    }
+    return {"", ""}; // return empty credential if invalid index
+}
+
+bool WifiCredentialStore::hasLastUsedCredential()
+{
+    int index = readLastUsedWifiIndex();
+    if (index >= 0 && index < WIFI_MAX_SAVED_CREDS)
+    {
+        return _savedWifis[index].ssid != "";
+    }
+    return false;
+}
