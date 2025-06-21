@@ -4,6 +4,8 @@
 
 bool WifiCaptive::startPortal()
 {
+    _credentialStore.readCredentials();
+
     WifiOperationCallbacks callbacks = {
         .resetSettings = [this](bool runCallback)
         { this->resetSettings(runCallback); },
@@ -14,20 +16,9 @@ bool WifiCaptive::startPortal()
 
     _captivePortalServer.begin(callbacks);
 
-    _credentialStore.readCredentials();
-
     // wait until SSID is provided
     auto succesfullyConnected = _captivePortalServer.runCaptivePortal(&_credentialStore, &_wifiConnector);
 
-    moreStuff();
-
-    _captivePortalServer.tearDownServers();
-
-    return succesfullyConnected;
-}
-
-void WifiCaptive::moreStuff()
-{
     // SSID provided, stop server
     WiFi.scanDelete();
     WiFi.softAPdisconnect(true);
@@ -41,6 +32,10 @@ void WifiCaptive::moreStuff()
         WiFi.begin(_captivePortalServer._ssid.c_str(), _captivePortalServer._password.c_str());
         _wifiConnector.waitForConnectResult();
     }
+
+    _captivePortalServer.tearDownServers();
+
+    return succesfullyConnected;
 }
 
 void WifiCaptive::resetSettings(bool runCallback)
