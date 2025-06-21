@@ -3,6 +3,7 @@
 
 #include <DNSServer.h>
 #include <ESPAsyncWebServer.h> //https://github.com/me-no-dev/ESPAsyncWebServer using the latest dev version from @me-no-dev
+#include "WebServer.h"
 
 class CaptivePortalServer
 {
@@ -14,6 +15,7 @@ public:
     void setUpDNSServer(const IPAddress &localIP);
     void tearDownDNSServer();
     void tearDownWebServer();
+    void begin(WifiOperationCallbacks callbacks); // todo: name?
 };
 
 #endif

@@ -11,15 +11,8 @@
 #include "WifiConnector.h"
 #include "CaptivePortalServer.h"
 
-#define WIFI_SSID "TRMNL"
-#define WIFI_PASSWORD NULL
-
 // Define the DNS interval in milliseconds between processing DNS requests
 #define DNS_INTERVAL 60
-// Define the maximum number of clients that can connect to the server
-#define MAX_CLIENTS 1
-// Define the WiFi channel to be used (channel 6 in this case)
-#define WIFI_CHANNEL 6
 // Define the maximum number of possible saved credentials
 #define WIFI_MAX_SAVED_CREDS 5
 // Define max connection timeout

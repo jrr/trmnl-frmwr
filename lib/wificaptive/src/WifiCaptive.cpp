@@ -4,52 +4,17 @@
 
 bool WifiCaptive::startPortal()
 {
-    _captivePortalServer._dnsServer = new DNSServer();
-    _captivePortalServer._server = new AsyncWebServer(80);
-
-    // Set the WiFi mode to access point and station
-    WiFi.mode(WIFI_MODE_AP);
-
-    // Define the subnet mask for the WiFi network
-    const IPAddress subnetMask(255, 255, 255, 0);
-    const IPAddress localIP(4, 3, 2, 1);
-    const IPAddress gatewayIP(4, 3, 2, 1);
-
-    WiFi.disconnect();
-    delay(50);
-
-    // Configure the soft access point with a specific IP and subnet mask
-    WiFi.softAPConfig(localIP, gatewayIP, subnetMask);
-    delay(50);
-
-    // Start the soft access point with the given ssid, password, channel, max number of clients
-    WiFi.softAP(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL, 0, MAX_CLIENTS);
-    delay(50);
-
-    // Disable AMPDU RX on the ESP32 WiFi to fix a bug on Android
-    esp_wifi_stop();
-    esp_wifi_deinit();
-    wifi_init_config_t my_config = WIFI_INIT_CONFIG_DEFAULT();
-    my_config.ampdu_rx_enable = false;
-    esp_wifi_init(&my_config);
-    esp_wifi_start();
-    vTaskDelay(100 / portTICK_PERIOD_MS); // Add a small delay
-
-    // configure DSN and WEB server
-    _captivePortalServer.setUpDNSServer(localIP);
-    
     WifiOperationCallbacks callbacks = {
-        .resetSettings = [this](bool runCallback) { this->resetSettings(runCallback); },
-        .setConnectionCredentials = [this](const String& ssid, const String& password, const String& api_server) { 
-            this->setConnectionCredentials(ssid, password, api_server); 
-        },
-        .getAnnotatedNetworks = [this](bool runScan) { return this->getAnnotatedNetworks(runScan); }
-    };
-    
-    setUpWebserver(*(_captivePortalServer._server), callbacks, localIP);
+        .resetSettings = [this](bool runCallback)
+        { this->resetSettings(runCallback); },
+        .setConnectionCredentials = [this](const String &ssid, const String &password, const String &api_server)
+        { this->setConnectionCredentials(ssid, password, api_server); },
+        .getAnnotatedNetworks = [this](bool runScan)
+        { return this->getAnnotatedNetworks(runScan); }};
 
-    // begin serving
-    _captivePortalServer._server->begin();
+    _captivePortalServer.begin(callbacks);
+
+    // #!#!#! grabbing more
 
     // start async network scan
     WiFi.scanNetworks(true);
