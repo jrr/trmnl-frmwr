@@ -3,8 +3,8 @@
 #include <functional>
 #include <vector>
 #include <AsyncJson.h>
-#include "WifiCredentialStore.h"
 #include "WifiCaptivePage.h"
+#include "wifi-types.h"
 
 #define LocalIPURL "http://4.3.2.1"
 

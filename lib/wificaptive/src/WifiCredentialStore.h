@@ -4,26 +4,13 @@
 #include <Arduino.h>
 #include <Preferences.h>
 #include <vector>
+#include "wifi-types.h"
 
 #define WIFI_MAX_SAVED_CREDS 5
 #define WIFI_SSID_KEY(i) ("wifi_" + String(i) + "_ssid").c_str()
 #define WIFI_PSWD_KEY(i) ("wifi_" + String(i) + "_pswd").c_str()
 
 #define WIFI_LAST_INDEX "wifi_last_index"
-
-struct WifiCreds
-{
-    String ssid;
-    String pswd;
-};
-
-struct Network
-{
-    String ssid;
-    int32_t rssi;
-    bool open;
-    bool saved;
-};
 
 class WifiCredentialStore
 {
