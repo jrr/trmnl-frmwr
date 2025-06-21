@@ -48,7 +48,6 @@ private:
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
-    std::vector<Network> getScannedUniqueNetworks(bool runScan);
 
 public:
     /// @brief Starts WiFi configuration portal.

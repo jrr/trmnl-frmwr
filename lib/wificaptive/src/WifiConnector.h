@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <vector>
+#include "WifiCredentialStore.h"
 
 #define CONNECTION_TIMEOUT 15000
 
@@ -16,6 +18,7 @@ public:
     uint8_t waitForConnectResult();
 
     uint8_t connect(String ssid, String pass);
+    std::vector<Network> getScannedUniqueNetworks(bool runScan);
 };
 
 #endif

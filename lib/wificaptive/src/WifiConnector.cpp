@@ -1,4 +1,6 @@
 #include "WifiConnector.h"
+#include "WifiCredentialStore.h"
+#include <trmnl_log.h>
 
 WifiConnector::WifiConnector()
 {
@@ -45,4 +47,83 @@ uint8_t WifiConnector::connect(String ssid, String pass)
     }
 
     return connRes;
+}
+
+std::vector<Network> WifiConnector::getScannedUniqueNetworks(bool runScan)
+{
+    std::vector<Network> uniqueNetworks;
+    int n = WiFi.scanComplete();
+    if (runScan == true)
+    {
+        WiFi.scanNetworks(false);
+        delay(100);
+        int n = WiFi.scanComplete();
+        while (n == WIFI_SCAN_RUNNING || n == WIFI_SCAN_FAILED)
+        {
+            delay(100);
+            if (n == WIFI_SCAN_RUNNING)
+            {
+                n = WiFi.scanComplete();
+            }
+            else if (n == WIFI_SCAN_FAILED)
+            {
+                // There is a race coniditon that can occur, particularly if you use the async flag of WiFi.scanNetworks(true),
+                // where you can race before the data is parsed. scanComplete will be -2, we'll see that and fail out, but then a few microseconds later it actually
+                // fills in. This fixes that, in case we ever move back to the async version of scanNetworks, but as long as it's sync above it'll work
+                // first shot always.
+                Log_verbose("Supposedly failed to finish scan, let's wait 10 seconds before checking again");
+                delay(10000);
+                n = WiFi.scanComplete();
+                if (n > 0)
+                {
+                    Log_verbose("Scan actually did complete, we have %d networks, breaking loop.", n);
+                    // it didn't actually fail, we just raced before the scan was done filling in data
+                    break;
+                }
+                WiFi.scanNetworks(false);
+                delay(500);
+                n = WiFi.scanComplete();
+            }
+        }
+    }
+
+    n = WiFi.scanComplete();
+    Log_verbose("Scanning networks, final scan result: %d", n);
+
+    // Process each found network
+    for (int i = 0; i < n; ++i)
+    {
+        if (!WiFi.SSID(i).equals("TRMNL"))
+        {
+            String ssid = WiFi.SSID(i);
+            int32_t rssi = WiFi.RSSI(i);
+            bool open = WiFi.encryptionType(i);
+            bool found = false;
+            for (auto &network : uniqueNetworks)
+            {
+                if (network.ssid == ssid)
+                {
+                    Serial.println("Equal SSID");
+                    found = true;
+                    if (network.rssi < rssi)
+                    {
+                        network.rssi = rssi; // Update to higher RSSI
+                    }
+                    break;
+                }
+            }
+            if (!found)
+            {
+                uniqueNetworks.push_back({ssid, rssi, open});
+            }
+        }
+    }
+
+    Log_info("Unique networks found: %d", uniqueNetworks.size());
+    for (auto &network : uniqueNetworks)
+    {
+        Log_info("SSID: %s, RSSI: %d, Open: %d", network.ssid.c_str(), network.rssi, network.open);
+    }
+
+    return uniqueNetworks;
 }
