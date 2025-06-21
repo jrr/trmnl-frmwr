@@ -1,12 +1,6 @@
 #include "WifiCaptive.h"
 #include <trmnl_log.h>
 
-void WifiCaptive::setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP)
-{
-    dnsServer.setTTL(3600);
-    dnsServer.start(53, "*", localIP);
-}
-
 void WifiCaptive::setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
 {
     //======================== Webserver ========================
@@ -168,7 +162,7 @@ bool WifiCaptive::startPortal()
     vTaskDelay(100 / portTICK_PERIOD_MS); // Add a small delay
 
     // configure DSN and WEB server
-    setUpDNSServer(*(_captivePortalServer._dnsServer), localIP);
+    _captivePortalServer.setUpDNSServer(localIP);
     setUpWebserver(*_server, localIP);
 
     // begin serving
@@ -225,10 +219,7 @@ bool WifiCaptive::startPortal()
         _wifiConnector.waitForConnectResult();
     }
 
-    // stop dsn
-    _captivePortalServer._dnsServer->stop();
-    delete _captivePortalServer._dnsServer;
-    _captivePortalServer._dnsServer = nullptr;
+    _captivePortalServer.tearDownDNSServer();
 
     // stop server
     _server->end();

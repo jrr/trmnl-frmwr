@@ -9,6 +9,8 @@ public:
     DNSServer *_dnsServer;
     
     CaptivePortalServer();
+    void setUpDNSServer(const IPAddress &localIP);
+    void tearDownDNSServer();
 };
 
 #endif

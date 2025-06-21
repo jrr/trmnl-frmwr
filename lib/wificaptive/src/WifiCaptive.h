@@ -46,7 +46,6 @@ private:
     WifiConnector _wifiConnector;
     CaptivePortalServer _captivePortalServer;
 
-    void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
 
 public:
