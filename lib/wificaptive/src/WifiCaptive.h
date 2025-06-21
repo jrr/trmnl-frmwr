@@ -9,6 +9,7 @@
 #include "Preferences.h"
 #include "WifiCaptivePage.h"
 #include <ArduinoJson.h>
+#include "WifiCredentialStore.h"
 
 #define WIFI_SSID "TRMNL"
 #define WIFI_PASSWORD NULL
@@ -36,11 +37,6 @@
 class WifiCaptive
 {
 private:
-    struct WifiCredentials
-    {
-        String ssid;
-        String pswd;
-    };
     struct Network
     {
         String ssid;
@@ -57,7 +53,7 @@ private:
 
     std::function<void()> _resetcallback;
 
-    WifiCredentials _savedWifis[WIFI_MAX_SAVED_CREDS];
+    WifiCreds _savedWifis[WIFI_MAX_SAVED_CREDS];
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
@@ -69,9 +65,9 @@ private:
     void saveLastUsedWifiIndex(int index);
     int readLastUsedWifiIndex();
     void saveApiServer(String url);
-    std::vector<WifiCredentials> matchNetworks(std::vector<Network> &scanResults, WifiCaptive::WifiCredentials wifiCredentials[]);
+    std::vector<WifiCreds> matchNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
-    std::vector<Network> combineNetworks(std::vector<Network> &scanResults, WifiCaptive::WifiCredentials wifiCredentials[]);
+    std::vector<Network> combineNetworks(std::vector<Network> &scanResults, WifiCreds wifiCredentials[]);
 
 public:
     /// @brief Starts WiFi configuration portal.

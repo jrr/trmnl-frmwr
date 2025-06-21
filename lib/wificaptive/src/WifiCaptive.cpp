@@ -500,15 +500,15 @@ std::vector<WifiCaptive::Network> WifiCaptive::getScannedUniqueNetworks(bool run
     return uniqueNetworks;
 }
 
-std::vector<WifiCaptive::WifiCredentials> WifiCaptive::matchNetworks(
+std::vector<WifiCreds> WifiCaptive::matchNetworks(
     std::vector<WifiCaptive::Network> &scanResults,
-    WifiCaptive::WifiCredentials savedWifis[])
+    WifiCreds savedWifis[])
 {
     // sort scan results by RSSI
     std::sort(scanResults.begin(), scanResults.end(), [](const Network &a, const Network &b)
               { return a.rssi > b.rssi; });
 
-    std::vector<WifiCredentials> sortedWifis;
+    std::vector<WifiCreds> sortedWifis;
     for (auto &network : scanResults)
     {
         for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
@@ -525,7 +525,7 @@ std::vector<WifiCaptive::WifiCredentials> WifiCaptive::matchNetworks(
 
 std::vector<WifiCaptive::Network> WifiCaptive::combineNetworks(
     std::vector<WifiCaptive::Network> &scanResults,
-    WifiCaptive::WifiCredentials savedWifis[])
+    WifiCreds savedWifis[])
 {
     std::vector<Network> combinedNetworks;
     for (auto &network : scanResults)
@@ -605,12 +605,12 @@ bool WifiCaptive::autoConnect()
 
     Log_info("Last used network unavailable, scanning for known networks...");
     std::vector<Network> scanResults = getScannedUniqueNetworks(true);
-    std::vector<WifiCaptive::WifiCredentials> sortedNetworks = matchNetworks(scanResults, _savedWifis);
+    std::vector<WifiCreds> sortedNetworks = matchNetworks(scanResults, _savedWifis);
     // if no networks found, try to connect to saved wifis
     if (sortedNetworks.size() == 0)
     {
         Log_info("No matched networks found in scan, trying all saved networks...");
-        sortedNetworks = std::vector<WifiCredentials>(_savedWifis, _savedWifis + WIFI_MAX_SAVED_CREDS);
+        sortedNetworks = std::vector<WifiCreds>(_savedWifis, _savedWifis + WIFI_MAX_SAVED_CREDS);
     }
 
     WiFi.mode(WIFI_STA);
