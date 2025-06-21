@@ -1,5 +1,4 @@
-#ifndef WiFiCaptive_h
-#define WiFiCaptive_h
+#pragma once
 
 #include <AsyncTCP.h> //https://github.com/me-no-dev/AsyncTCP using the latest dev version from @me-no-dev
 #include <DNSServer.h>
@@ -36,19 +35,19 @@ class WifiCaptive
 private:
     // DNSServer *_dnsServer;
     // AsyncWebServer *_server;
+
+    CaptivePortalServer _captivePortalServer;
+
+public:
+    /* ==== vvvv ==== todo : move ==== vvvv ==== */
     String _ssid = "";
     String _password = "";
     String _api_server = "";
-
     std::function<void()> _resetcallback;
-
-    WifiCredentialStore _credentialStore;
     WifiConnector _wifiConnector;
-    CaptivePortalServer _captivePortalServer;
+    WifiCredentialStore _credentialStore;
+    /* ========================================== */
 
-    void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
-
-public:
     /// @brief Starts WiFi configuration portal.
     /// @return True if successfully connected to provided SSID, false otherwise.
     bool startPortal();
@@ -70,5 +69,3 @@ public:
 };
 
 extern WifiCaptive WifiCaptivePortal;
-
-#endif
