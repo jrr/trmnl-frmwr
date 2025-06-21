@@ -10,6 +10,7 @@
 #include <ArduinoJson.h>
 #include "WifiCredentialStore.h"
 #include "WifiConnector.h"
+#include "CaptivePortalServer.h"
 
 #define WIFI_SSID "TRMNL"
 #define WIFI_PASSWORD NULL
@@ -33,7 +34,7 @@
 class WifiCaptive
 {
 private:
-    DNSServer *_dnsServer;
+    // DNSServer *_dnsServer;
     AsyncWebServer *_server;
     String _ssid = "";
     String _password = "";
@@ -43,6 +44,7 @@ private:
 
     WifiCredentialStore _credentialStore;
     WifiConnector _wifiConnector;
+    CaptivePortalServer _captivePortalServer;
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);

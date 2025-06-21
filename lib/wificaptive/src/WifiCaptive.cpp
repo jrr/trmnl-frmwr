@@ -136,7 +136,7 @@ void WifiCaptive::setUpWebserver(AsyncWebServer &server, const IPAddress &localI
 
 bool WifiCaptive::startPortal()
 {
-    _dnsServer = new DNSServer();
+    _captivePortalServer._dnsServer = new DNSServer();
     _server = new AsyncWebServer(80);
 
     // Set the WiFi mode to access point and station
@@ -168,7 +168,7 @@ bool WifiCaptive::startPortal()
     vTaskDelay(100 / portTICK_PERIOD_MS); // Add a small delay
 
     // configure DSN and WEB server
-    setUpDNSServer(*_dnsServer, localIP);
+    setUpDNSServer(*(_captivePortalServer._dnsServer), localIP);
     setUpWebserver(*_server, localIP);
 
     // begin serving
@@ -183,7 +183,7 @@ bool WifiCaptive::startPortal()
     // wait until SSID is provided
     while (1)
     {
-        _dnsServer->processNextRequest();
+        _captivePortalServer._dnsServer->processNextRequest();
 
         if (_ssid == "")
         {
@@ -226,9 +226,9 @@ bool WifiCaptive::startPortal()
     }
 
     // stop dsn
-    _dnsServer->stop();
-    delete _dnsServer;
-    _dnsServer = nullptr;
+    _captivePortalServer._dnsServer->stop();
+    delete _captivePortalServer._dnsServer;
+    _captivePortalServer._dnsServer = nullptr;
 
     // stop server
     _server->end();
