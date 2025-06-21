@@ -16,3 +16,9 @@ void CaptivePortalServer::tearDownDNSServer()
     delete _dnsServer;
     _dnsServer = nullptr;
 }
+void CaptivePortalServer::tearDownWebServer()
+{
+    _server->end();
+    delete _server;
+    _server = nullptr;
+}

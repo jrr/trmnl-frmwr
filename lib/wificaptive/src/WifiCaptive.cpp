@@ -220,11 +220,7 @@ bool WifiCaptive::startPortal()
     }
 
     _captivePortalServer.tearDownDNSServer();
-
-    // stop server
-    _captivePortalServer._server->end();
-    delete _captivePortalServer._server;
-    _captivePortalServer._server = nullptr;
+    _captivePortalServer.tearDownWebServer();
 
     return succesfullyConnected;
 }

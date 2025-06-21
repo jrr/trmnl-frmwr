@@ -13,6 +13,7 @@ public:
     CaptivePortalServer();
     void setUpDNSServer(const IPAddress &localIP);
     void tearDownDNSServer();
+    void tearDownWebServer();
 };
 
 #endif
