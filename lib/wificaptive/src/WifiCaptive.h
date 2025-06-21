@@ -42,10 +42,10 @@ private:
     String _ssid = "";
     String _password = "";
     String _api_server = "";
+    std::function<void()> _resetcallback;
 
 public:
     /* ==== vvvv ==== todo : move ==== vvvv ==== */
-    std::function<void()> _resetcallback;
     WifiConnector _wifiConnector;
     WifiCredentialStore _credentialStore;
     /* ========================================== */
@@ -59,7 +59,7 @@ public:
     bool isSaved();
 
     /// @brief Resets all saved credentials
-    void resetSettings();
+    void resetSettings(bool runCallback = false);
 
     /// @brief sets the function callback that is triggered when uses performs soft reset
     /// @param func reset callback

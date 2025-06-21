@@ -99,12 +99,16 @@ bool WifiCaptive::startPortal()
     return succesfullyConnected;
 }
 
-void WifiCaptive::resetSettings()
+void WifiCaptive::resetSettings(bool runCallback)
 {
     _credentialStore.clearSavedWifiCredentials();
     _credentialStore.clearSavedApiUrl();
 
     WiFi.disconnect(true, true);
+    
+    if (runCallback && _resetcallback != nullptr) {
+        _resetcallback();
+    }
 }
 
 void WifiCaptive::setResetSettingsCallback(std::function<void()> func)

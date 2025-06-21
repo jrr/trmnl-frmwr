@@ -51,11 +51,7 @@ void setUpWebserver(AsyncWebServer &server, WifiCaptive *wifiCaptive, const IPAd
 
     server.on("/soft-reset", HTTP_ANY, [&](AsyncWebServerRequest *request)
               {
-  wifiCaptive->resetSettings();
-
-		if (wifiCaptive->_resetcallback != NULL) {
-			wifiCaptive->_resetcallback(); // @CALLBACK
-		}
+		wifiCaptive->resetSettings(true);
 		request->send(200); });
 
     auto scanGET = server.on("/scan", HTTP_GET, [&](AsyncWebServerRequest *request)
