@@ -21,8 +21,13 @@ void CaptivePortalServer::setUpDNSServer(const IPAddress &localIP)
     _dnsServer->setTTL(3600);
     _dnsServer->start(53, "*", localIP);
 }
-void CaptivePortalServer::tearDownServers()
+void CaptivePortalServer::tearDown()
 {
+    // Clean up scan results and disconnect AP
+    WiFi.scanDelete();
+    WiFi.softAPdisconnect(true);
+    delay(1000);
+
     _dnsServer->stop();
     delete _dnsServer;
     _dnsServer = nullptr;

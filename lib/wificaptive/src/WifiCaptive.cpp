@@ -19,11 +19,6 @@ bool WifiCaptive::startPortal()
     // wait until SSID is provided
     auto succesfullyConnected = _captivePortalServer.runCaptivePortal(&_credentialStore, &_wifiConnector);
 
-    // SSID provided, stop server
-    WiFi.scanDelete();
-    WiFi.softAPdisconnect(true);
-    delay(1000);
-
     auto status = WiFi.status();
     if (status != WL_CONNECTED)
     {
@@ -33,7 +28,7 @@ bool WifiCaptive::startPortal()
         _wifiConnector.waitForConnectResult();
     }
 
-    _captivePortalServer.tearDownServers();
+    _captivePortalServer.tearDown();
 
     return succesfullyConnected;
 }

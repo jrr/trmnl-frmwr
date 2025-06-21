@@ -19,7 +19,7 @@ public:
 
     CaptivePortalServer();
     void setUpDNSServer(const IPAddress &localIP);
-    void tearDownServers();
+    void tearDown();
     void begin(WifiOperationCallbacks callbacks); // todo: name?
     bool runCaptivePortal(WifiCredentialStore *credentialStore, WifiConnector *wifiConnector);
 
