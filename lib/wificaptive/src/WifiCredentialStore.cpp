@@ -205,8 +205,10 @@ std::vector<WifiCreds> WifiCredentialStore::getPrioritizedCredentials(std::vecto
         }
     }
 
+    // none matched, just return all the saved ones
     if (sortedWifis.empty())
     {
+        Log_info("No matched networks found in scan, trying all saved networks...");
         for (int i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
         {
             sortedWifis.push_back(_savedWifis[i]);

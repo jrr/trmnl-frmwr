@@ -9,6 +9,7 @@
 #include "WifiCaptivePage.h"
 #include <ArduinoJson.h>
 #include "WifiCredentialStore.h"
+#include "WifiConnector.h"
 
 #define WIFI_SSID "TRMNL"
 #define WIFI_PASSWORD NULL
@@ -43,12 +44,11 @@ private:
     std::function<void()> _resetcallback;
 
     WifiCredentialStore _credentialStore;
+    WifiConnector _wifiConnector;
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP);
     uint8_t connect(String ssid, String pass);
-    uint8_t waitForConnectResult(uint32_t timeout);
-    uint8_t waitForConnectResult();
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
 
 public:

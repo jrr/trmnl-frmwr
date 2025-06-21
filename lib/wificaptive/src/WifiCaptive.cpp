@@ -222,7 +222,7 @@ bool WifiCaptive::startPortal()
         Log_info("Not connected after AP disconnect");
         WiFi.mode(WIFI_STA);
         WiFi.begin(_ssid.c_str(), _password.c_str());
-        waitForConnectResult();
+        _wifiConnector.waitForConnectResult();
     }
 
     // stop dsn
@@ -254,44 +254,10 @@ uint8_t WifiCaptive::connect(String ssid, String pass)
     {
         WiFi.enableSTA(true);
         WiFi.begin(ssid.c_str(), pass.c_str());
-        connRes = waitForConnectResult();
+        connRes = _wifiConnector.waitForConnectResult();
     }
 
     return connRes;
-}
-
-/**
- * waitForConnectResult
- * @param  uint16_t timeout  in seconds
- * @return uint8_t  WL Status
- */
-uint8_t WifiCaptive::waitForConnectResult(uint32_t timeout)
-{
-    if (timeout == 0)
-    {
-        return WiFi.waitForConnectResult();
-    }
-
-    unsigned long timeoutmillis = millis() + timeout;
-    uint8_t status = WiFi.status();
-
-    while (millis() < timeoutmillis)
-    {
-        status = WiFi.status();
-        // @todo detect additional states, connect happens, then dhcp then get ip, there is some delay here, make sure not to timeout if waiting on IP
-        if (status == WL_CONNECTED || status == WL_CONNECT_FAILED)
-        {
-            return status;
-        }
-        delay(100);
-    }
-
-    return status;
-}
-
-uint8_t WifiCaptive::waitForConnectResult()
-{
-    return waitForConnectResult(CONNECTION_TIMEOUT);
 }
 
 void WifiCaptive::setResetSettingsCallback(std::function<void()> func)
