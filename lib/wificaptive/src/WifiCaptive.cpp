@@ -19,13 +19,9 @@ bool WifiCaptive::startPortal()
     // wait until SSID is provided
     auto succesfullyConnected = _captivePortalServer.runCaptivePortal(&_credentialStore, &_wifiConnector);
 
-    auto status = WiFi.status();
-    if (status != WL_CONNECTED)
+    if (succesfullyConnected)
     {
-        Log_info("Not connected after AP disconnect");
-        WiFi.mode(WIFI_STA);
-        WiFi.begin(_captivePortalServer._ssid.c_str(), _captivePortalServer._password.c_str());
-        _wifiConnector.waitForConnectResult();
+        _wifiConnector.connectIfNeeded(_captivePortalServer._ssid, _captivePortalServer._password);
     }
 
     _captivePortalServer.tearDown();

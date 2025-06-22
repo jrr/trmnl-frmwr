@@ -202,3 +202,17 @@ bool WifiConnector::autoConnect(WifiCredentialStore &credentialStore)
     Log_info("Failed to connect to any network");
     return false;
 }
+
+bool WifiConnector::connectIfNeeded(const String &ssid, const String &password)
+{
+    auto status = WiFi.status();
+    if (status != WL_CONNECTED)
+    {
+        Log_info("Not connected after AP disconnect");
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(ssid.c_str(), password.c_str());
+        waitForConnectResult();
+        return WiFi.status() == WL_CONNECTED;
+    }
+    return true;
+}

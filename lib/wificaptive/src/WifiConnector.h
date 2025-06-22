@@ -23,6 +23,8 @@ public:
     bool tryConnectWithRetries(const String &ssid, const String &password);
 
     bool autoConnect(WifiCredentialStore &credentialStore);
+
+    bool connectIfNeeded(const String &ssid, const String &password);
 };
 
 #endif
