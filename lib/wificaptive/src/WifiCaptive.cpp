@@ -10,7 +10,7 @@ bool WifiCaptive::startPortal()
         .resetSettings = [this](bool runCallback)
         { this->resetSettings(runCallback); },
         .setConnectionCredentials = [this](const String &ssid, const String &password, const String &api_server)
-        { this->_captivePortalServer.setConnectionCredentials(ssid, password, api_server); },
+        { this->_captivePortalServer.setConnectionCredentials({ssid, password}, api_server); },
         .getAnnotatedNetworks = [this](bool runScan)
         { return this->getAnnotatedNetworks(runScan); }};
 
@@ -21,7 +21,7 @@ bool WifiCaptive::startPortal()
 
     if (succesfullyConnected)
     {
-        _wifiConnector.connectIfNeeded(_captivePortalServer._ssid, _captivePortalServer._password);
+        _wifiConnector.connectIfNeeded(_captivePortalServer._credentials);
     }
 
     _captivePortalServer.tearDown();

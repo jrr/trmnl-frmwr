@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <vector>
 #include "WifiCredentialStore.h"
+#include "wifi-types.h"
 
 #define CONNECTION_TIMEOUT 15000
 
@@ -17,14 +18,14 @@ public:
     uint8_t waitForConnectResult(uint32_t timeout);
     uint8_t waitForConnectResult();
 
-    uint8_t connect(String ssid, String pass);
+    uint8_t connect(const WifiCreds &creds);
     std::vector<Network> getScannedUniqueNetworks(bool runScan);
 
-    bool tryConnectWithRetries(const String &ssid, const String &password);
+    bool tryConnectWithRetries(const WifiCreds &creds);
 
     bool autoConnect(WifiCredentialStore &credentialStore);
 
-    bool connectIfNeeded(const String &ssid, const String &password);
+    bool connectIfNeeded(const WifiCreds &creds);
 };
 
 #endif

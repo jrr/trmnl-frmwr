@@ -38,14 +38,14 @@ uint8_t WifiConnector::waitForConnectResult()
     return waitForConnectResult(CONNECTION_TIMEOUT);
 }
 
-uint8_t WifiConnector::connect(String ssid, String pass)
+uint8_t WifiConnector::connect(const WifiCreds &creds)
 {
     uint8_t connRes = (uint8_t)WL_NO_SSID_AVAIL;
 
-    if (ssid != "")
+    if (creds.ssid != "")
     {
         WiFi.enableSTA(true);
-        WiFi.begin(ssid.c_str(), pass.c_str());
+        WiFi.begin(creds.ssid.c_str(), creds.pswd.c_str());
         connRes = waitForConnectResult();
     }
 
@@ -131,17 +131,17 @@ std::vector<Network> WifiConnector::getScannedUniqueNetworks(bool runScan)
     return uniqueNetworks;
 }
 
-bool WifiConnector::tryConnectWithRetries(const String &ssid, const String &password)
+bool WifiConnector::tryConnectWithRetries(const WifiCreds &creds)
 {
     for (int attempt = 0; attempt < WIFI_CONNECTION_ATTEMPTS; attempt++)
     {
-        Log_info("Attempt %d to connect to %s", attempt + 1, ssid.c_str());
-        connect(ssid, password);
+        Log_info("Attempt %d to connect to %s", attempt + 1, creds.ssid.c_str());
+        connect(creds);
 
         // Check if connected
         if (WiFi.status() == WL_CONNECTED)
         {
-            Log_info("Connected to %s", ssid.c_str());
+            Log_info("Connected to %s", creds.ssid.c_str());
             return true;
         }
         WiFi.disconnect();
@@ -171,7 +171,7 @@ bool WifiConnector::autoConnect(WifiCredentialStore &credentialStore)
         WiFi.setMinSecurity(WIFI_AUTH_OPEN);
         WiFi.mode(WIFI_STA);
 
-        if (tryConnectWithRetries(lastUsed.ssid, lastUsed.pswd))
+        if (tryConnectWithRetries(lastUsed))
         {
             return true;
         }
@@ -192,7 +192,7 @@ bool WifiConnector::autoConnect(WifiCredentialStore &credentialStore)
 
         Log_info("Trying to connect to saved network %s...", network.ssid.c_str());
 
-        if (tryConnectWithRetries(network.ssid, network.pswd))
+        if (tryConnectWithRetries(network))
         {
             credentialStore.saveLastUsedSsid(network.ssid);
             return true;
@@ -203,14 +203,14 @@ bool WifiConnector::autoConnect(WifiCredentialStore &credentialStore)
     return false;
 }
 
-bool WifiConnector::connectIfNeeded(const String &ssid, const String &password)
+bool WifiConnector::connectIfNeeded(const WifiCreds &creds)
 {
     auto status = WiFi.status();
     if (status != WL_CONNECTED)
     {
         Log_info("Not connected after AP disconnect");
         WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid.c_str(), password.c_str());
+        WiFi.begin(creds.ssid.c_str(), creds.pswd.c_str());
         waitForConnectResult();
         return WiFi.status() == WL_CONNECTED;
     }

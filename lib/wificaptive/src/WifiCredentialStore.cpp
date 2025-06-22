@@ -23,14 +23,14 @@ void WifiCredentialStore::readCredentials()
 
     preferences.end();
 }
-void WifiCredentialStore::saveWifiCredentials(String ssid, String pass)
+void WifiCredentialStore::saveWifiCredentials(const WifiCreds &creds)
 {
-    Log_info("Saving wifi credentials: %s", ssid.c_str());
+    Log_info("Saving wifi credentials: %s", creds.ssid.c_str());
 
     // Check if the credentials already exist
     for (u16_t i = 0; i < WIFI_MAX_SAVED_CREDS; i++)
     {
-        if (_savedWifis[i].ssid == ssid && _savedWifis[i].pswd == pass)
+        if (_savedWifis[i].ssid == creds.ssid && _savedWifis[i].pswd == creds.pswd)
         {
             return; // Avoid saving duplicate networks
         }
@@ -41,7 +41,7 @@ void WifiCredentialStore::saveWifiCredentials(String ssid, String pass)
         _savedWifis[i] = _savedWifis[i - 1];
     }
 
-    _savedWifis[0] = {ssid, pass};
+    _savedWifis[0] = creds;
 
     Preferences preferences;
     preferences.begin("wificaptive", false);

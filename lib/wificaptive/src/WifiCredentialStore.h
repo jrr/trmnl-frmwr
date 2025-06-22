@@ -22,7 +22,7 @@ public:
     WifiCreds getLastUsedCredential();
     bool hasLastUsedCredential();
 
-    void saveWifiCredentials(String ssid, String pass);
+    void saveWifiCredentials(const WifiCreds &creds);
 
     void clearSavedWifiCredentials();
 

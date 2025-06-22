@@ -5,13 +5,14 @@
 #include "WebServer.h"
 #include "WifiCredentialStore.h"
 #include "WifiConnector.h"
+#include "wifi-types.h"
 
 class CaptivePortalServer
 {
 
+private:
 public:
-    String _ssid = ""; // todo: move
-    String _password = "";
+    WifiCreds _credentials = {"", ""};
     String _api_server = "";
 
     DNSServer *_dnsServer;
@@ -24,5 +25,5 @@ public:
     bool runCaptivePortal(WifiCredentialStore *credentialStore, WifiConnector *wifiConnector);
 
     /// @brief Sets the connection credentials from captive portal
-    void setConnectionCredentials(const String &ssid, const String &password, const String &api_server);
+    void setConnectionCredentials(const WifiCreds &creds, const String &api_server);
 };

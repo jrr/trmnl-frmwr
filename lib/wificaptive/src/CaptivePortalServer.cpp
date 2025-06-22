@@ -86,24 +86,23 @@ bool CaptivePortalServer::runCaptivePortal(WifiCredentialStore *credentialStore,
     {
         _dnsServer->processNextRequest();
 
-        if (_ssid == "")
+        if (_credentials.ssid == "")
         {
             delay(DNS_INTERVAL);
         }
         else
         {
-            bool res = wifiConnector->connect(_ssid, _password) == WL_CONNECTED;
+            bool res = wifiConnector->connect(_credentials) == WL_CONNECTED;
             if (res)
             {
-                credentialStore->saveWifiCredentials(_ssid, _password);
+                credentialStore->saveWifiCredentials(_credentials);
                 credentialStore->saveApiServer(_api_server);
                 return true;
                 break;
             }
             else
             {
-                _ssid = "";
-                _password = "";
+                _credentials = {"", ""};
 
                 WiFi.disconnect();
                 WiFi.enableSTA(false);
@@ -114,9 +113,8 @@ bool CaptivePortalServer::runCaptivePortal(WifiCredentialStore *credentialStore,
     return false;
 }
 
-void CaptivePortalServer::setConnectionCredentials(const String &ssid, const String &password, const String &api_server)
+void CaptivePortalServer::setConnectionCredentials(const WifiCreds &creds, const String &api_server)
 {
-    _ssid = ssid;
-    _password = password;
+    _credentials = creds;
     _api_server = api_server;
 }
