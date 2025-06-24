@@ -32,6 +32,7 @@
 #include "driver/gpio.h"
 #include <nvs.h>
 #include <serialize_log.h>
+#include <wifi-helpers.h>
 
 bool pref_clear = false;
 String new_filename = "";
@@ -2172,7 +2173,7 @@ DeviceStatusStamp getDeviceStatusStamp()
   sprintf(fw_version, "%d.%d.%d", FW_MAJOR_VERSION, FW_MINOR_VERSION, FW_PATCH_VERSION);
 
   deviceStatus.wifi_rssi_level = WiFi.RSSI();
-  parseWifiStatusToStr(deviceStatus.wifi_status, sizeof(deviceStatus.wifi_status), WiFi.status());
+  strncpy(deviceStatus.wifi_status, parseWifiStatusToStr(WiFi.status()).c_str(), sizeof(deviceStatus.wifi_status) - 1);
   deviceStatus.refresh_rate = preferences.getUInt(PREFERENCES_SLEEP_TIME_KEY);
   deviceStatus.time_since_last_sleep = time_since_sleep;
   snprintf(deviceStatus.current_fw_version, sizeof(deviceStatus.current_fw_version), "%d.%d.%d", FW_MAJOR_VERSION, FW_MINOR_VERSION, FW_PATCH_VERSION);

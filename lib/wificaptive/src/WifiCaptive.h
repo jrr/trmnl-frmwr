@@ -32,6 +32,8 @@
 
 #define WIFI_LAST_INDEX "wifi_last_index"
 
+wl_status_t waitForConnectResult(uint32_t timeout);
+
 class WifiCaptive
 {
 private:
@@ -47,8 +49,6 @@ private:
 
     void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP);
     uint8_t connect(const WifiCredentials credentials);
-    uint8_t waitForConnectResult(uint32_t timeout);
-    uint8_t waitForConnectResult();
     void readWifiCredentials();
     void saveWifiCredentials(const WifiCredentials credentials);
     void saveLastUsedWifiIndex(int index);

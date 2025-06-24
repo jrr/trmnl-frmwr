@@ -1,0 +1,76 @@
+#include "esp_event.h"
+#include "esp_wifi.h"
+#include <Arduino.h>
+
+struct IdfWifiEventItem
+{
+  const char *name;
+  wifi_event_t value;
+};
+
+static const IdfWifiEventItem idfWifiEventMap[] = {
+    {"WIFI_EVENT_WIFI_READY = 0", WIFI_EVENT_WIFI_READY},
+    {"WIFI_EVENT_SCAN_DONE", WIFI_EVENT_SCAN_DONE},
+    {"WIFI_EVENT_STA_START", WIFI_EVENT_STA_START},
+    {"WIFI_EVENT_STA_STOP", WIFI_EVENT_STA_STOP},
+    {"WIFI_EVENT_STA_CONNECTED", WIFI_EVENT_STA_CONNECTED},
+    {"WIFI_EVENT_STA_DISCONNECTED", WIFI_EVENT_STA_DISCONNECTED},
+    {"WIFI_EVENT_STA_AUTHMODE_CHANGE", WIFI_EVENT_STA_AUTHMODE_CHANGE},
+    {"WIFI_EVENT_STA_WPS_ER_SUCCESS", WIFI_EVENT_STA_WPS_ER_SUCCESS},
+    {"WIFI_EVENT_STA_WPS_ER_FAILED", WIFI_EVENT_STA_WPS_ER_FAILED},
+    {"WIFI_EVENT_STA_WPS_ER_TIMEOUT", WIFI_EVENT_STA_WPS_ER_TIMEOUT},
+    {"WIFI_EVENT_STA_WPS_ER_PIN", WIFI_EVENT_STA_WPS_ER_PIN},
+    {"WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP", WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP},
+    {"WIFI_EVENT_AP_START", WIFI_EVENT_AP_START},
+    {"WIFI_EVENT_AP_STOP", WIFI_EVENT_AP_STOP},
+    {"WIFI_EVENT_AP_STACONNECTED", WIFI_EVENT_AP_STACONNECTED},
+    {"WIFI_EVENT_AP_STADISCONNECTED", WIFI_EVENT_AP_STADISCONNECTED},
+    {"WIFI_EVENT_AP_PROBEREQRECVED", WIFI_EVENT_AP_PROBEREQRECVED},
+    {"WIFI_EVENT_FTM_REPORT", WIFI_EVENT_FTM_REPORT},
+    {"WIFI_EVENT_STA_BSS_RSSI_LOW", WIFI_EVENT_STA_BSS_RSSI_LOW},
+    {"WIFI_EVENT_ACTION_TX_STATUS", WIFI_EVENT_ACTION_TX_STATUS},
+    {"WIFI_EVENT_ROC_DONE", WIFI_EVENT_ROC_DONE},
+    {"WIFI_EVENT_STA_BEACON_TIMEOUT", WIFI_EVENT_STA_BEACON_TIMEOUT},
+    {"WIFI_EVENT_MAX", WIFI_EVENT_MAX},
+};
+
+String idfWifiEventName(wifi_event_t item)
+{
+  for (const IdfWifiEventItem &entry : idfWifiEventMap)
+  {
+    if (item == entry.value)
+    {
+      return String(entry.name);
+    }
+  }
+  return String("UNKNOWN_EVENT");
+}
+
+struct IdfIpEventItem
+{
+  const char *name;
+  ip_event_t value;
+};
+
+static const IdfIpEventItem idfIpEventMap[] = {
+    {"IP_EVENT_STA_GOT_IP", IP_EVENT_STA_GOT_IP},
+    {"IP_EVENT_STA_LOST_IP", IP_EVENT_STA_LOST_IP},
+    {"IP_EVENT_AP_STAIPASSIGNED", IP_EVENT_AP_STAIPASSIGNED},
+    {"IP_EVENT_GOT_IP6", IP_EVENT_GOT_IP6},
+    {"IP_EVENT_ETH_GOT_IP", IP_EVENT_ETH_GOT_IP},
+    {"IP_EVENT_ETH_LOST_IP", IP_EVENT_ETH_LOST_IP},
+    {"IP_EVENT_PPP_GOT_IP", IP_EVENT_PPP_GOT_IP},
+    {"IP_EVENT_PPP_LOST_IP", IP_EVENT_PPP_LOST_IP},
+};
+
+String idfIpEventName(ip_event_t item)
+{
+  for (const IdfIpEventItem &entry : idfIpEventMap)
+  {
+    if (item == entry.value)
+    {
+      return String(entry.name);
+    }
+  }
+  return String("UNKNOWN_EVENT");
+}
