@@ -122,7 +122,8 @@ bool WifiCaptive::startPortal()
         Log_info("Not connected after AP disconnect");
         WiFi.mode(WIFI_STA);
 
-        status = initiateConnectionAndWaitForOutcome({_ssid, _password});
+        auto result = initiateConnectionAndWaitForOutcome({_ssid, _password});
+        status = result.status;
     }
 
     // stop dsn
@@ -167,7 +168,8 @@ uint8_t WifiCaptive::connect(const WifiCredentials credentials)
     {
         WiFi.enableSTA(true);
 
-        connRes = initiateConnectionAndWaitForOutcome(credentials);
+        auto result = initiateConnectionAndWaitForOutcome(credentials);
+        connRes = result.status;
     }
 
     return connRes;

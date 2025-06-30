@@ -1,3 +1,4 @@
+#include "connect.h"
 #include "WifiCaptive.h"
 #include <trmnl_log.h>
 #include "WebServer.h"
@@ -5,18 +6,38 @@
 #include "esp_event.h"
 #include "esp_wifi.h"
 
-wl_status_t initiateConnectionAndWaitForOutcome(const WifiCredentials credentials)
+void captureEventData(WiFiEvent_t event, WiFiEventInfo_t info, WifiEventData *eventData)
 {
+    switch (event)
+    {
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        eventData->disconnected = true;
+        eventData->disconnectReason = (wifi_err_reason_t)info.wifi_sta_disconnected.reason;
+        Log_info("Disconnected from WiFi, reason: %s", WiFi.disconnectReasonName((wifi_err_reason_t)info.wifi_sta_disconnected.reason));
+    default:
+        break;
+    }
+}
+
+WifiConnectionResult initiateConnectionAndWaitForOutcome(const WifiCredentials credentials)
+{
+    WifiEventData eventData;
+
     for (int i = ARDUINO_EVENT_WIFI_READY; i < ARDUINO_EVENT_MAX; i++)
     {
-        WiFi.onEvent([i](WiFiEvent_t event, WiFiEventInfo_t info)
-                     { Log_info("[Arduino] WiFi event %s", WiFi.eventName((arduino_event_id_t)i)); }, (arduino_event_id_t)i);
+        WiFi.onEvent([i, &eventData](WiFiEvent_t event, WiFiEventInfo_t info)
+                     {
+                         Log_info("[Arduino] WiFi event %s", WiFi.eventName((arduino_event_id_t)i));
+                         eventData.eventCount++;
+
+                         captureEventData(event, info, &eventData); },
+                     (arduino_event_id_t)i);
     }
 
     auto beginResult = WiFi.begin(credentials.ssid.c_str(), credentials.pswd.c_str());
     Log_info("WiFi.begin() -> %s", parseWifiStatusToStr(beginResult).c_str());
 
-    wl_status_t result = waitForConnectResult(CONNECTION_TIMEOUT);
+    auto result = waitForConnectResult(CONNECTION_TIMEOUT);
 
     // Clean up Arduino event handlers
     for (int i = ARDUINO_EVENT_WIFI_READY; i < ARDUINO_EVENT_MAX; i++)
@@ -24,7 +45,7 @@ wl_status_t initiateConnectionAndWaitForOutcome(const WifiCredentials credential
         WiFi.removeEvent(i);
     }
 
-    return result;
+    return {result, eventData};
 }
 
 wl_status_t waitForConnectResult(uint32_t timeout)
