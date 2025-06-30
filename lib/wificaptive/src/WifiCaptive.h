@@ -32,8 +32,6 @@
 
 #define WIFI_LAST_INDEX "wifi_last_index"
 
-wl_status_t waitForConnectResult(uint32_t timeout);
-
 class WifiCaptive
 {
 private:

@@ -173,39 +173,6 @@ uint8_t WifiCaptive::connect(const WifiCredentials credentials)
     return connRes;
 }
 
-wl_status_t waitForConnectResult(uint32_t timeout)
-{
-    if (timeout == 0)
-    {
-        wl_status_t r = (wl_status_t)WiFi.waitForConnectResult();
-        Log_verbose("timeout is 0; WiFi.waitForConnectResult() -> %s", parseWifiStatusToStr(r).c_str());
-        return r;
-    }
-
-    unsigned long timeoutmillis = millis() + timeout;
-    wl_status_t status = WiFi.status();
-
-    while (millis() < timeoutmillis)
-    {
-        wl_status_t newStatus = WiFi.status();
-        if (newStatus != status)
-        {
-            Log_verbose("WiFi status changed from %s to %s",
-                        parseWifiStatusToStr(status).c_str(),
-                        parseWifiStatusToStr(newStatus).c_str());
-        }
-        status = newStatus;
-        // @todo detect additional states, connect happens, then dhcp then get ip, there is some delay here, make sure not to timeout if waiting on IP
-        if (status == WL_CONNECTED || status == WL_CONNECT_FAILED)
-        {
-            return status;
-        }
-        delay(100);
-    }
-
-    return status;
-}
-
 void WifiCaptive::setResetSettingsCallback(std::function<void()> func)
 {
     _resetcallback = func;
