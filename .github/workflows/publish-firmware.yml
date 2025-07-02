@@ -8,12 +8,9 @@ on:
         required: true
         type: boolean
       filename_suffix_type:
-        description: 'Type of suffix to use for firmware file names'
+        description: 'Type of suffix to use for firmware file names (git_tag or git_short_hash)'
         required: true
-        type: choice
-        options:
-          - git_tag
-          - git_short_hash
+        type: string
 
 jobs:
   publish:
