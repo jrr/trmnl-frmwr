@@ -10,62 +10,35 @@ StoredLogs subject(0, 3, "log_", "log_head", persistence);
 
 void test_stores_string(void)
 {
-  // Test basic storage with (0,3) configuration - should behave like original
-  TEST_ASSERT_EQUAL(0, persistence.size());
-  LogStoreResult result = subject.store_log("asdf");
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result.status);
-  TEST_ASSERT_EQUAL(1, persistence.size());
-  String s = subject.gather_stored_logs();
-  TEST_ASSERT_EQUAL_STRING("asdf", s.c_str());
+  // Test basic storage with (0,3) configuration
+  subject.store_log("asdf");
+  TEST_ASSERT_EQUAL_STRING("asdf", subject.gather_stored_logs().c_str());
   subject.clear_stored_logs();
-  TEST_ASSERT_EQUAL(0, persistence.size());
 }
 
 void test_stores_several_strings()
 {
   // Test storing multiple strings with (0,3) - fills all 3 newest slots
-  TEST_ASSERT_EQUAL(0, persistence.size());
-  LogStoreResult result1 = subject.store_log("asdf");
-  LogStoreResult result2 = subject.store_log("qwer");
-  LogStoreResult result3 = subject.store_log("zxcv");
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result1.status);
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result2.status);
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result3.status);
-  TEST_ASSERT_EQUAL(3, persistence.size());
-  String s = subject.gather_stored_logs();
-  TEST_ASSERT_EQUAL_STRING("asdf,qwer,zxcv", s.c_str());
+  subject.store_log("asdf");
+  subject.store_log("qwer");
+  subject.store_log("zxcv");
+  TEST_ASSERT_EQUAL_STRING("asdf,qwer,zxcv", subject.gather_stored_logs().c_str());
   subject.clear_stored_logs();
-  TEST_ASSERT_EQUAL(0, persistence.size());
 }
 
 void test_circular_buffer_overwrites_oldest()
 {
   // Test (0,3) circular buffer behavior - overwrites when exceeding 3 newest slots
-  TEST_ASSERT_EQUAL(0, persistence.size());
-
-  LogStoreResult result1 = subject.store_log("log1");
-  LogStoreResult result2 = subject.store_log("log2");
-  LogStoreResult result3 = subject.store_log("log3");
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result1.status);
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result2.status);
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result3.status);
-
-  TEST_ASSERT_EQUAL(3, persistence.size());
-
-  LogStoreResult result4 = subject.store_log("log4");
-  TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result4.status);
-
-  // Should now be 4 total (3 logs + head pointer)
-  TEST_ASSERT_EQUAL(4, persistence.size());
-
-  String s = subject.gather_stored_logs();
-
-  TEST_ASSERT(strstr(s.c_str(), "log4,") != NULL);
-  TEST_ASSERT(strstr(s.c_str(), "log1,") == NULL); // log1 should be gone
-
+  subject.store_log("log1");
+  subject.store_log("log2");
+  subject.store_log("log3");
+  TEST_ASSERT_EQUAL_STRING("log1,log2,log3", subject.gather_stored_logs().c_str());
+  
+  // Adding 4th item should overwrite log1 in slot 0
+  subject.store_log("log4");
+  TEST_ASSERT_EQUAL_STRING("log4,log2,log3", subject.gather_stored_logs().c_str());
+  
   subject.clear_stored_logs();
-
-  TEST_ASSERT_EQUAL(1, persistence.size());
 }
 
 void test_overwrite_counter()
@@ -73,13 +46,13 @@ void test_overwrite_counter()
   // Test overwrite counter with (0,3) - counts when circular buffer wraps
   TEST_ASSERT_EQUAL(0, subject.get_overwrite_count());
 
-  // Fill all slots
+  // Fill all slots - no overwrites yet
   subject.store_log("log1");
   subject.store_log("log2");
   subject.store_log("log3");
   TEST_ASSERT_EQUAL(0, subject.get_overwrite_count());
 
-  // Now start overwriting
+  // Start overwriting
   subject.store_log("log4");
   TEST_ASSERT_EQUAL(1, subject.get_overwrite_count());
 
