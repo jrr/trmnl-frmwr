@@ -7,76 +7,10 @@ StoredLogs::StoredLogs(uint8_t old_count, uint8_t new_count, const char *log_key
 
 LogStoreResult StoredLogs::store_log(const String& log_buffer)
 {
-  uint8_t max_notes = old_count + new_count;
+  uint8_t total_slots = old_count + new_count;
   
-  // Special case: if new_count is 0, only keep oldest items
-  if (new_count == 0)
-  {
-    // Find first empty slot in oldest section
-    for (uint8_t i = 0; i < old_count; i++)
-    {
-      String key = log_key + String(i);
-      if (!persistence.recordExists(key.c_str()))
-      {
-        size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
-        if (res == log_buffer.length())
-        {
-          return {LogStoreResult::SUCCESS, "Log stored in oldest slot", i};
-        }
-        else
-        {
-          return {LogStoreResult::FAILURE, "Failed to write to oldest slot", i};
-        }
-      }
-    }
-    // All oldest slots full, discard new log
-    return {LogStoreResult::SUCCESS, "Log discarded - oldest slots full", 0};
-  }
-  
-  // Special case: if old_count is 0, use pure circular buffer (existing behavior)
-  if (old_count == 0)
-  {
-    // Try to find an empty slot first
-    for (uint8_t i = 0; i < new_count; i++)
-    {
-      String key = log_key + String(i);
-      if (!persistence.recordExists(key.c_str()))
-      {
-        size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
-        if (res == log_buffer.length())
-        {
-          return {LogStoreResult::SUCCESS, "Log stored in new slot", i};
-        }
-        else
-        {
-          return {LogStoreResult::FAILURE, "Failed to write to new slot", i};
-        }
-      }
-    }
-
-    // All slots full, use circular buffer behavior
-    uint8_t head = persistence.readUChar(head_key, 0);
-    
-    String key = log_key + String(head);
-    size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
-    if (res != log_buffer.length())
-    {
-      return {LogStoreResult::FAILURE, "Failed to overwrite slot", head};
-    }
-
-    uint8_t next_head = (head + 1) % new_count;
-    if (!persistence.writeUChar(head_key, next_head))
-    {
-      return {LogStoreResult::FAILURE, "Log written but head update failed", head};
-    }
-
-    overwrite_count++;
-    return {LogStoreResult::SUCCESS, "Log overwrote existing slot", head};
-  }
-  
-  // Mixed mode: both old_count > 0 and new_count > 0
-  // First fill oldest slots, then use circular buffer for newest slots
-  for (uint8_t i = 0; i < old_count; i++)
+  // Find first empty slot across entire range
+  for (uint8_t i = 0; i < total_slots; i++)
   {
     String key = log_key + String(i);
     if (!persistence.recordExists(key.c_str()))
@@ -84,33 +18,40 @@ LogStoreResult StoredLogs::store_log(const String& log_buffer)
       size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
       if (res == log_buffer.length())
       {
-        return {LogStoreResult::SUCCESS, "Log stored in oldest slot", i};
+        return {LogStoreResult::SUCCESS, "Log stored in empty slot", i};
       }
       else
       {
-        return {LogStoreResult::FAILURE, "Failed to write to oldest slot", i};
+        return {LogStoreResult::FAILURE, "Failed to write to empty slot", i};
       }
     }
   }
   
-  // Oldest slots full, now use circular buffer for newest slots
-  uint8_t head = persistence.readUChar(head_key, old_count); // Start head at old_count
+  // All slots full - handle based on mode
+  if (new_count == 0)
+  {
+    return {LogStoreResult::SUCCESS, "Log discarded - oldest slots full", 0};
+  }
   
-  String key = log_key + String(head);
+  // Use circular buffer in newest section
+  uint8_t head = persistence.readUChar(head_key, old_count);
+  uint8_t slot = old_count + ((head - old_count) % new_count);
+  
+  String key = log_key + String(slot);
   size_t res = persistence.writeString(key.c_str(), log_buffer.c_str());
   if (res != log_buffer.length())
   {
-    return {LogStoreResult::FAILURE, "Failed to overwrite newest slot", head};
+    return {LogStoreResult::FAILURE, "Failed to overwrite slot", slot};
   }
 
   uint8_t next_head = old_count + ((head - old_count + 1) % new_count);
   if (!persistence.writeUChar(head_key, next_head))
   {
-    return {LogStoreResult::FAILURE, "Log written but head update failed", head};
+    return {LogStoreResult::FAILURE, "Log written but head update failed", slot};
   }
 
   overwrite_count++;
-  return {LogStoreResult::SUCCESS, "Log overwrote newest slot", head};
+  return {LogStoreResult::SUCCESS, "Log overwrote slot", slot};
 }
 
 String StoredLogs::gather_stored_logs()
