@@ -5,10 +5,12 @@
 #include "memory_persistence.h"
 
 MemoryPersistence persistence;
+// Test configuration: 0 oldest + 3 newest = current circular buffer behavior
 StoredLogs subject(0, 3, "log_", "log_head", persistence);
 
 void test_stores_string(void)
 {
+  // Test basic storage with (0,3) configuration - should behave like original
   TEST_ASSERT_EQUAL(0, persistence.size());
   LogStoreResult result = subject.store_log("asdf");
   TEST_ASSERT_EQUAL(LogStoreResult::SUCCESS, result.status);
@@ -21,6 +23,7 @@ void test_stores_string(void)
 
 void test_stores_several_strings()
 {
+  // Test storing multiple strings with (0,3) - fills all 3 newest slots
   TEST_ASSERT_EQUAL(0, persistence.size());
   LogStoreResult result1 = subject.store_log("asdf");
   LogStoreResult result2 = subject.store_log("qwer");
@@ -37,6 +40,7 @@ void test_stores_several_strings()
 
 void test_circular_buffer_overwrites_oldest()
 {
+  // Test (0,3) circular buffer behavior - overwrites when exceeding 3 newest slots
   TEST_ASSERT_EQUAL(0, persistence.size());
 
   LogStoreResult result1 = subject.store_log("log1");
@@ -66,6 +70,7 @@ void test_circular_buffer_overwrites_oldest()
 
 void test_overwrite_counter()
 {
+  // Test overwrite counter with (0,3) - counts when circular buffer wraps
   TEST_ASSERT_EQUAL(0, subject.get_overwrite_count());
 
   // Fill all slots
