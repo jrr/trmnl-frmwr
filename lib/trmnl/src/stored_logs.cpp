@@ -2,12 +2,13 @@
 #include <trmnl_log.h>
 #include <persistence_interface.h>
 
-StoredLogs::StoredLogs(uint8_t max_notes, const char *log_key, const char *head_key, Persistence& persistence)
-    : max_notes(max_notes), log_key(log_key), head_key(head_key), persistence(persistence), overwrite_count(0) {}
+StoredLogs::StoredLogs(uint8_t old_count, uint8_t new_count, const char *log_key, const char *head_key, Persistence& persistence)
+    : old_count(old_count), new_count(new_count), log_key(log_key), head_key(head_key), persistence(persistence), overwrite_count(0) {}
 
 LogStoreResult StoredLogs::store_log(const String& log_buffer)
 {
   // Try to find an empty slot first
+  uint8_t max_notes = old_count + new_count;
   for (uint8_t i = 0; i < max_notes; i++)
   {
     String key = log_key + String(i);
@@ -49,6 +50,7 @@ LogStoreResult StoredLogs::store_log(const String& log_buffer)
 String StoredLogs::gather_stored_logs()
 {
   String log;
+  uint8_t max_notes = old_count + new_count;
   for (uint8_t i = 0; i < max_notes; i++)
   {
     String key = log_key + String(i);
@@ -73,6 +75,7 @@ String StoredLogs::gather_stored_logs()
 void StoredLogs::clear_stored_logs()
 {
   int count = 0;
+  uint8_t max_notes = old_count + new_count;
   for (uint8_t i = 0; i < max_notes; i++)
   {
     String key = log_key + String(i);

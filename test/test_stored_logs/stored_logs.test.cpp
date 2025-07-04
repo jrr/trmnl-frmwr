@@ -5,7 +5,7 @@
 #include "memory_persistence.h"
 
 MemoryPersistence persistence;
-StoredLogs subject(3, "log_", "log_head", persistence);
+StoredLogs subject(0, 3, "log_", "log_head", persistence);
 
 void test_stores_string(void)
 {
