@@ -107,6 +107,11 @@ void test_mixed_mode_1_oldest_2_newest()
   // Add 5th item - should overwrite "third" in newest section  
   subject.store_log("fifth");
   TEST_ASSERT_EQUAL_STRING("first,fourth,fifth", subject.gather_stored_logs().c_str());
+  
+  // Test clearing mixed mode - should clear both oldest and newest slots
+  subject.clear_stored_logs();
+  TEST_ASSERT_EQUAL_STRING("", subject.gather_stored_logs().c_str());
+  TEST_ASSERT_EQUAL(0, subject.get_overwrite_count());
 }
 
 void test_mixed_mode_2_oldest_1_newest()
