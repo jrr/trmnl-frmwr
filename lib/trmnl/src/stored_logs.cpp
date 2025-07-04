@@ -51,24 +51,59 @@ String StoredLogs::gather_stored_logs()
 {
   String log;
   uint8_t max_notes = old_count + new_count;
+  
+  // Count how many slots are actually filled
+  uint8_t filled_slots = 0;
   for (uint8_t i = 0; i < max_notes; i++)
   {
     String key = log_key + String(i);
     if (persistence.recordExists(key.c_str()))
     {
-      String note = persistence.readString(key.c_str(), "");
-      if (note.length() > 0)
+      filled_slots++;
+    }
+  }
+  
+  if (filled_slots == 0) return log;
+  
+  // If buffer is not full, use simple order
+  if (filled_slots < max_notes)
+  {
+    for (uint8_t i = 0; i < max_notes; i++)
+    {
+      String key = log_key + String(i);
+      if (persistence.recordExists(key.c_str()))
       {
-        log += note;
-
-        String next_key = log_key + String(i + 1);
-        if (persistence.recordExists(next_key.c_str()))
+        String note = persistence.readString(key.c_str(), "");
+        if (note.length() > 0)
         {
-          log += ",";
+          if (log.length() > 0) log += ",";
+          log += note;
         }
       }
     }
   }
+  else
+  {
+    // Buffer is full, use head pointer to determine chronological order
+    uint8_t head = persistence.readUChar(head_key, 0);
+    
+    // Start from head position (oldest) and wrap around
+    for (uint8_t i = 0; i < max_notes; i++)
+    {
+      uint8_t slot = (head + i) % max_notes;
+      String key = log_key + String(slot);
+      if (persistence.recordExists(key.c_str()))
+      {
+        String note = persistence.readString(key.c_str(), "");
+        if (note.length() > 0)
+        {
+          if (log.length() > 0) log += ",";
+          log += note;
+        }
+      }
+    }
+  }
+  
   return log;
 }
 

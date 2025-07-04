@@ -34,9 +34,9 @@ void test_circular_buffer_overwrites_oldest()
   subject.store_log("log3");
   TEST_ASSERT_EQUAL_STRING("log1,log2,log3", subject.gather_stored_logs().c_str());
   
-  // Adding 4th item should overwrite log1 in slot 0
+  // Adding 4th item should overwrite log1, chronological order: log2,log3,log4
   subject.store_log("log4");
-  TEST_ASSERT_EQUAL_STRING("log4,log2,log3", subject.gather_stored_logs().c_str());
+  TEST_ASSERT_EQUAL_STRING("log2,log3,log4", subject.gather_stored_logs().c_str());
   
   subject.clear_stored_logs();
 }
