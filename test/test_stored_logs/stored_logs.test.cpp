@@ -135,6 +135,20 @@ void test_mixed_mode_2_oldest_1_newest()
   TEST_ASSERT_EQUAL_STRING("first,second,fifth", subject.gather_stored_logs().c_str());
 }
 
+void test_several_overwrites()
+{
+  MemoryPersistence persistence;
+  StoredLogs subject(3, 5, "mix35_", "mix35_head", persistence);
+
+  for (int i = 0; i < 15; i++)
+  {
+    subject.store_log(String(i));
+  }
+
+  TEST_ASSERT_EQUAL(7, subject.get_overwrite_count());
+  TEST_ASSERT_EQUAL_STRING("0,1,2,10,11,12,13,14", subject.gather_stored_logs().c_str());
+}
+
 void setUp(void) {}
 
 void tearDown(void) {}
@@ -149,6 +163,7 @@ void process()
   RUN_TEST(test_keeps_oldest_only);
   RUN_TEST(test_mixed_mode_1_oldest_2_newest);
   RUN_TEST(test_mixed_mode_2_oldest_1_newest);
+  RUN_TEST(test_several_overwrites);
   UNITY_END();
 }
 
