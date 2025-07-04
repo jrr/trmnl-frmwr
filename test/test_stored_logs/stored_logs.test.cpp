@@ -88,6 +88,27 @@ void test_keeps_oldest_only()
   TEST_ASSERT_EQUAL_STRING("first,second,third", subject.gather_stored_logs().c_str());
 }
 
+void test_mixed_mode_1_oldest_2_newest()
+{
+  // Test (1,2) configuration - keeps 1 oldest, 2 newest
+  MemoryPersistence persistence;
+  StoredLogs subject(1, 2, "mix_", "mix_head", persistence);
+  
+  // Fill up: 1 oldest + 2 newest
+  subject.store_log("first");   // goes to oldest slot 0
+  subject.store_log("second");  // goes to newest slot 1
+  subject.store_log("third");   // goes to newest slot 2
+  TEST_ASSERT_EQUAL_STRING("first,second,third", subject.gather_stored_logs().c_str());
+  
+  // Add 4th item - should overwrite "second" in newest section
+  subject.store_log("fourth");
+  TEST_ASSERT_EQUAL_STRING("first,third,fourth", subject.gather_stored_logs().c_str());
+  
+  // Add 5th item - should overwrite "third" in newest section  
+  subject.store_log("fifth");
+  TEST_ASSERT_EQUAL_STRING("first,fourth,fifth", subject.gather_stored_logs().c_str());
+}
+
 void setUp(void) {}
 
 void tearDown(void) {}
@@ -100,6 +121,7 @@ void process()
   RUN_TEST(test_circular_buffer_overwrites_oldest);
   RUN_TEST(test_overwrite_counter);
   RUN_TEST(test_keeps_oldest_only);
+  RUN_TEST(test_mixed_mode_1_oldest_2_newest);
   UNITY_END();
 }
 
