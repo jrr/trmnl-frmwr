@@ -35,6 +35,7 @@
 #include <serialize_log.h>
 #include <preferences_persistence.h>
 #include "logo_small.h"
+#include "grayscale_test.h"
 #include <wifi-helpers.h>
 
 bool pref_clear = false;
@@ -231,6 +232,21 @@ void bl_init(void)
   // EPD clear
   Log.info("%s [%d]: Display init\r\n", __FILE__, __LINE__);
   display_init();
+
+#ifdef TEST_GRAYSCALE
+  // Test grayscale display capability
+  Log.info("%s [%d]: Displaying grayscale test image\r\n", __FILE__, __LINE__);
+  buffer = (uint8_t *)malloc(grayscale_test_png_len);
+  if (buffer) {
+    memcpy(buffer, grayscale_test_png, grayscale_test_png_len);
+    display_show_image(buffer, grayscale_test_png_len, nullptr, 0);
+    free(buffer);
+    buffer = nullptr;
+  }
+  Log.info("%s [%d]: Grayscale test complete, going to sleep\r\n", __FILE__, __LINE__);
+  display_sleep();
+  goToSleep();
+#endif
 
   if (wakeup_reason != ESP_SLEEP_WAKEUP_TIMER)
   {

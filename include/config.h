@@ -89,6 +89,8 @@ enum WIFI_CONNECT_RETRY_TIME // Time to sleep before trying to connect to the Wi
 
 #define FAKE_BATTERY_VOLTAGE // Uncomment to report 4.2V instead of reading ADC
 
+#define TEST_GRAYSCALE // Uncomment to display grayscale test image on boot
+
 #define BUTTON_HOLD_TIME 7000
 
 #define BUTTON_SOFT_RESET_TIME 15000

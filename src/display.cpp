@@ -10,7 +10,11 @@
 //#define TWO_BIT_PANEL EP426_800x480_4GRAY
 #define ONE_BIT_PANEL EP75_800x480
 #define TWO_BIT_PANEL EP75_800x480_4GRAY_OLD
+#ifdef TEST_GRAYSCALE
+BBEPAPER bbep(TWO_BIT_PANEL);  // Use grayscale mode for testing
+#else
 BBEPAPER bbep(ONE_BIT_PANEL);
+#endif
 // Counts the number of partial updates to know when to do a full update
 RTC_DATA_ATTR int iUpdateCount = 0;
 #else
