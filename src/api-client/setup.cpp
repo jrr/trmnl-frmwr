@@ -22,6 +22,7 @@ void addSetupHeaders(HTTPClient &https, ApiSetupInputs &inputs)
 
 ApiSetupResult fetchApiSetup(ApiSetupInputs &apiSetupInputs)
 {
+  int temp_todo = 0;
   return withHttp(
       apiSetupInputs.baseUrl + "/api/setup",
       [&apiSetupInputs](HTTPClient *https, HttpError error) -> ApiSetupResult
